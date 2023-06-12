@@ -151,7 +151,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>This article describes creating an ADBCVA ADaM with Best-Corrected Visual Acuity (BCVA) data for ophthalmology endpoints. It is to be used in conjunction with the article on <a href="https://pharmaverse.github.io/admiral/articles/bds_finding.html">creating a BDS dataset from SDTM</a>. As such, derivations and processes that are not specific to ADBCVA are absent, and the user is invited to consult the aforementioned article for guidance.</p>
+<p>This article describes creating an ADBCVA ADaM with Best-Corrected Visual Acuity (BCVA) data for ophthalmology endpoints. It is to be used in conjunction with the article on <a href="https://pharmaverse.github.io/admiral/cran-release/articles/bds_finding.html">creating a BDS dataset from SDTM</a>. As such, derivations and processes that are not specific to ADBCVA are absent, and the user is invited to consult the aforementioned article for guidance.</p>
 <p><strong>Note</strong>: <em>All examples assume CDISC SDTM and/or ADaM format as input unless otherwise specified.</em></p>
 <div id="dataset-contents" class="section level2">
 <h2>Dataset Contents</h2>
@@ -181,7 +181,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="setup" class="section level2">
 <h2>Initial set up of ADBCVA</h2>
 <p>As with all BDS ADaM datasets, one should start from the OE SDTM, where only the BCVA records are of interest. For the purposes of the next two sections, we shall be using the <code>{admiral}</code> OE and ADSL test data. We will also require a lookup table for the mapping of parameter codes.</p>
-<p><strong>Note</strong>: to simulate an ophthalmology study, we add a randomly generated <code>STUDYEYE</code> variable to ADSL, but in practice <code>STUDYEYE</code> will already have been derived using <code>derive_var_studyeye</code>.</p>
+<p><strong>Note</strong>: to simulate an ophthalmology study, we add a randomly generated <code>STUDYEYE</code> variable to ADSL, but in practice <code>STUDYEYE</code> will already have been derived using <code>derive_var_studyeye()</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;admiral_oe&quot;</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;admiral_adsl&quot;</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -196,13 +196,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Lookup table ----</span></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>param_lookup <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>OETESTCD, <span class="sc">~</span>OELAT, <span class="sc">~</span>STUDYEYE, <span class="sc">~</span>PARAMCD, <span class="sc">~</span>PARAM, <span class="sc">~</span>PARAMN,</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;VACSCORE&quot;</span>, <span class="st">&quot;RIGHT&quot;</span>, <span class="st">&quot;RIGHT&quot;</span>, <span class="st">&quot;SBCVA&quot;</span>, <span class="st">&quot;Study Eye Visual Acuity Score&quot;</span>, <span class="dv">1</span>,</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;VACSCORE&quot;</span>, <span class="st">&quot;LEFT&quot;</span>, <span class="st">&quot;LEFT&quot;</span>, <span class="st">&quot;SBCVA&quot;</span>, <span class="st">&quot;Study Eye Visual Acuity Score&quot;</span>, <span class="dv">1</span>,</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;VACSCORE&quot;</span>, <span class="st">&quot;RIGHT&quot;</span>, <span class="st">&quot;LEFT&quot;</span>, <span class="st">&quot;FBCVA&quot;</span>, <span class="st">&quot;Fellow Eye Visual Acuity Score&quot;</span>, <span class="dv">2</span>,</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;VACSCORE&quot;</span>, <span class="st">&quot;LEFT&quot;</span>, <span class="st">&quot;RIGHT&quot;</span>, <span class="st">&quot;FBCVA&quot;</span>, <span class="st">&quot;Fellow Eye Visual Acuity Score&quot;</span>, <span class="dv">2</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>Following this setup, the programmer can start constructing ADBCVA. The first step is to subset OE to only BCVA parameters and merge with ADSL. This is required for two reasons: firstly, <code>STUDYEYE</code> is crucial in the mapping of <code>PARAMCD</code>’s. Secondly, the treatment start date (<code>TRTSDT</code>) is also a prerequisite for the derivation of variables such as Analysis Day (<code>ADY</code>).</p>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>OETESTCD, <span class="sc">~</span>AFEYE, <span class="sc">~</span>PARAMCD, <span class="sc">~</span>PARAM, <span class="sc">~</span>PARAMN,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;VACSCORE&quot;</span>, <span class="st">&quot;Study Eye&quot;</span>, <span class="st">&quot;SBCVA&quot;</span>, <span class="st">&quot;Study Eye Visual Acuity Score (letters)&quot;</span>, <span class="dv">1</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;VACSCORE&quot;</span>, <span class="st">&quot;Fellow Eye&quot;</span>, <span class="st">&quot;FBCVA&quot;</span>, <span class="st">&quot;Fellow Eye Visual Acuity Score (letters)&quot;</span>, <span class="dv">2</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>Following this setup, the programmer can start constructing ADBCVA. The first step is to subset OE to only BCVA parameters and merge with ADSL. This is required for two reasons: firstly, <code>STUDYEYE</code> is crucial in the mapping of <code>AFEYE</code> and <code>PARAMCD</code>’s. Secondly, the treatment start date (<code>TRTSDT</code>) is also a prerequisite for the derivation of variables such as Analysis Day (<code>ADY</code>).</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>adsl_vars <span class="ot">&lt;-</span> <span class="fu">exprs</span>(TRTSDT, TRTEDT, TRT01A, TRT01P, STUDYEYE)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>adbcva <span class="ot">&lt;-</span> oe <span class="sc">%&gt;%</span></span>
@@ -214,25 +212,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">new_vars =</span> adsl_vars,</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">exprs</span>(STUDYID, USUBJID)</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
-<p>The next item of business is to derive <code>AVAL</code>, <code>AVALU</code>, and <code>DTYPE</code>. In this example, due to the small number of parameters their derivation is trivial.</p>
+<p>The next item of business is to derive <code>AVAL</code>, <code>AVALU</code>, and <code>DTYPE</code>. In this example, due to the small number of parameters their derivation is trivial. <code>AFEYE</code> is also created in this step using the function <code>derive_var_afeye()</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>adbcva <span class="ot">&lt;-</span> adbcva <span class="sc">%&gt;%</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">AVAL =</span> OESTRESN,</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">AVALU =</span> <span class="st">&quot;letters&quot;</span>,</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">DTYPE =</span> <span class="cn">NA_character_</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
-<p>Moving forwards, <code>PARAM</code> and <code>PARAMCD</code> can be assigned using <code>derive_vars_merged</code> from <code>{admiral}</code> and the lookup table <code>param_lookup</code> generated above.</p>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_var_afeye</span>(OELOC, OELAT)</span></code></pre></div>
+<p>Moving forwards, <code>PARAM</code> and <code>PARAMCD</code> can be assigned using <code>derive_vars_merged()</code> from <code>{admiral}</code> and the lookup table <code>param_lookup</code> generated above.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>adbcva <span class="ot">&lt;-</span> adbcva <span class="sc">%&gt;%</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_vars_merged</span>(</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset_add =</span> param_lookup,</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">new_vars =</span> <span class="fu">exprs</span>(PARAM, PARAMCD),</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">exprs</span>(OETESTCD, OELAT, STUDYEYE),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">exprs</span>(OETESTCD, AFEYE),</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">filter_add =</span> PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;SBCVA&quot;</span>, <span class="st">&quot;FBCVA&quot;</span>)</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
 </div>
 <div id="logmar" class="section level2">
 <h2>Deriving LogMAR Score Parameters</h2>
-<p>Often ADBCVA datasets contain derived records for BCVA in LogMAR units. This can easily be achieved as follows using <code>derive_param_computed</code>. The conversion of units is done using <code>convert_etdrs_to_logmar</code>. Two separate calls are required due to the parameters being split by study and fellow eye. Once these extra parameters are added, all the records that will be in the end dataset are now present, so <code>AVALC</code> and day/date variables such as <code>ADY</code> and <code>ADT</code> can be derived.</p>
+<p>Often ADBCVA datasets contain derived records for BCVA in LogMAR units. This can easily be achieved as follows using <code>derive_param_computed()</code>. The conversion of units is done using <code>convert_etdrs_to_logmar()</code>. Two separate calls are required due to the parameters being split by study and fellow eye. Once these extra parameters are added, all the records that will be in the end dataset are now present, so <code>AVALC</code> and day/date variables such as <code>ADY</code> and <code>ADT</code> can be derived.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>adbcva <span class="ot">&lt;-</span> adbcva <span class="sc">%&gt;%</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_param_computed</span>(</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">c</span>(<span class="fu">exprs</span>(STUDYID, USUBJID, VISIT, VISITNUM, OEDY, OEDTC), adsl_vars),</span>
@@ -263,7 +262,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">flag_imputation =</span> <span class="st">&quot;none&quot;</span></span>
 <span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
 <span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_vars_dy</span>(<span class="at">reference_date =</span> TRTSDT, <span class="at">source_vars =</span> <span class="fu">exprs</span>(ADT))</span></code></pre></div>
-<p>Importantly, the above calls to <code>derive_param_computed</code> list the SDTM variables <code>VISIT</code>, <code>VISITNUM</code>, <code>OEDY</code> and <code>OEDTC</code> as <code>by_vars</code> for the function. This is because they will be necessary to derive ADaM variables such as <code>AVISIT</code> and <code>ADY</code> in successive steps. Once all the ADaM variables which require them are derived, the SDTM variables should be set to missing for the derived records, as per ADaM standards:</p>
+<p>Importantly, the above calls to <code>derive_param_computed()</code> list the SDTM variables <code>VISIT</code>, <code>VISITNUM</code>, <code>OEDY</code> and <code>OEDTC</code> as <code>by_vars</code> for the function. This is because they will be necessary to derive ADaM variables such as <code>AVISIT</code> and <code>ADY</code> in successive steps. Once all the ADaM variables which require them are derived, the SDTM variables should be set to missing for the derived records, as per ADaM standards:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>adbcva <span class="ot">&lt;-</span> adbcva <span class="sc">%&gt;%</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">VISIT =</span> <span class="fu">ifelse</span>(PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;SBCVALOG&quot;</span>, <span class="st">&quot;FBCVALOG&quot;</span>), <span class="cn">NA_character_</span>, VISIT),</span>
@@ -274,7 +273,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="further" class="section level2">
 <h2>Further Derivations of Standard BDS Variables</h2>
-<p>The user is invited to consult the article on <a href="https://pharmaverse.github.io/admiral/articles/bds_finding.html">creating a BDS dataset from SDTM</a> to learn how to add standard BDS variables to ADBCVA. Henceforth, for the purposes of this article, the following sections use the ADBCVA dataset generated by the corresponding <code>{admiralophtha}</code> template program as a starting point.</p>
+<p>The user is invited to consult the article on <a href="https://pharmaverse.github.io/admiral/cran-release/articles/bds_finding.html">creating a BDS dataset from SDTM</a> to learn how to add standard BDS variables to ADBCVA. Henceforth, for the purposes of this article, the following sections use the ADBCVA dataset generated by the corresponding <code>{admiralophtha}</code> template program as a starting point.</p>
 <p><strong>Note</strong>: This dataset already comes with some criterion flags and analysis value categorisation variables, so for illustration purposes these are removed.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;admiralophtha_adbcva&quot;</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -366,85 +365,85 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <tr class="odd">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
-<td align="right">97</td>
-<td align="left">20/12</td>
-<td align="right">12</td>
+<td align="right">82</td>
+<td align="left">20/25</td>
+<td align="right">25</td>
 </tr>
 <tr class="even">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
-<td align="right">35</td>
-<td align="left">20/200</td>
-<td align="right">200</td>
+<td align="right">77</td>
+<td align="left">20/32</td>
+<td align="right">32</td>
 </tr>
 <tr class="odd">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
-<td align="right">24</td>
-<td align="left">20/320</td>
-<td align="right">320</td>
+<td align="right">77</td>
+<td align="left">20/32</td>
+<td align="right">32</td>
 </tr>
 <tr class="even">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
-<td align="right">62</td>
-<td align="left">20/63</td>
-<td align="right">63</td>
+<td align="right">64</td>
+<td align="left">20/50</td>
+<td align="right">50</td>
 </tr>
 <tr class="odd">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
-<td align="right">31</td>
-<td align="left">20/250</td>
-<td align="right">250</td>
+<td align="right">92</td>
+<td align="left">20/16</td>
+<td align="right">16</td>
 </tr>
 <tr class="even">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
-<td align="right">84</td>
-<td align="left">20/20</td>
-<td align="right">20</td>
+<td align="right">41</td>
+<td align="left">20/160</td>
+<td align="right">160</td>
 </tr>
 <tr class="odd">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
-<td align="right">35</td>
-<td align="left">20/200</td>
-<td align="right">200</td>
+<td align="right">52</td>
+<td align="left">20/100</td>
+<td align="right">100</td>
 </tr>
 <tr class="even">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
-<td align="right">69</td>
-<td align="left">20/40</td>
-<td align="right">40</td>
+<td align="right">2</td>
+<td align="left">&lt; 20/800</td>
+<td align="right">1000</td>
 </tr>
 <tr class="odd">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
-<td align="right">88</td>
-<td align="left">20/20</td>
-<td align="right">20</td>
+<td align="right">44</td>
+<td align="left">20/125</td>
+<td align="right">125</td>
 </tr>
 <tr class="even">
 <td align="left">01-701-1015</td>
 <td align="left">SBCVA</td>
-<td align="right">82</td>
-<td align="left">20/25</td>
-<td align="right">25</td>
+<td align="right">97</td>
+<td align="left">20/12</td>
+<td align="right">12</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div id="critflags" class="section level2">
 <h2>Deriving Criterion Flags for BCVA Change</h2>
-<p><code>{admiralophtha}</code> suggests the use of criterion flag variable pairs (<code>CRITx</code>/<code>CRITxFL</code>) to program BCVA endpoints such as <em>Avoiding a loss of x letters</em> or <em>Gain of y letters</em> or <em>Gain of between x and y letters</em> (relative to baseline or other basetypes). The package provides the function <code>derive_var_bcvacritxfl</code> to program these endpoints efficiently and consistently. In terms of the logic to apply to the variable <code>CHG</code>, the endpoints fall into three classes, which can be represented by inequalities:</p>
+<p><code>{admiralophtha}</code> suggests the use of criterion flag variable pairs (<code>CRITx</code>/<code>CRITxFL</code>) to program BCVA endpoints such as <em>Avoiding a loss of x letters</em> or <em>Gain of y letters</em> or <em>Gain of between x and y letters</em> (relative to baseline or other basetypes). The package provides the function <code>derive_var_bcvacritxfl()</code> to program these endpoints efficiently and consistently. In terms of the logic to apply to the variable <code>CHG</code>, the endpoints fall into three classes, which can be represented by inequalities:</p>
 <ul>
 <li>Class 1: <code>CHG</code> value lying inside a range, <code>a &lt;= CHG &lt;= b</code>.</li>
 <li>Class 2: <code>CHG</code> value below an upper limit, <code>CHG &lt;= a</code>.</li>
 <li>Class 3: <code>CHG</code> value above a lower limit, <code>CHG =&gt; b</code>.</li>
 </ul>
-<p>By using <code>derive_var_bcvacritxfl</code>, the ADaM programmer can implement all three types of endpoint at once. This is achieved by feeding the appropriate ranges, upper limits and lower limits to the <code>bcva_ranges</code>, <code>bcva_uplims</code> and <code>bcva_lowlims</code> arguments of the function. For instance, let’s suppose that the endpoints of interest are:</p>
+<p>By using <code>derive_var_bcvacritxfl()</code>, the ADaM programmer can implement all three types of endpoint at once. This is achieved by feeding the appropriate ranges, upper limits and lower limits to the <code>bcva_ranges</code>, <code>bcva_uplims</code> and <code>bcva_lowlims</code> arguments of the function. For instance, let’s suppose that the endpoints of interest are:</p>
 <ul>
 <li><em>Gain of between 5 and 10 letters relative to baseline</em> (Class 1: <code>5 &lt;= CHG &lt;= 10</code>)</li>
 <li><em>Gain of 25 letters or fewer relative to baseline</em> (Class 2: <code>CHG &lt;= 25</code>)</li>
@@ -499,150 +498,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <tr class="odd">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
-<td align="right">97</td>
-<td align="right">62</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= 25</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= -5</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= 15</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= -10</td>
-<td align="left">Y</td>
-</tr>
-<tr class="even">
-<td align="left">01-701-1015</td>
-<td align="left">FBCVA</td>
-<td align="right">35</td>
-<td align="right">0</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= 25</td>
-<td align="left">Y</td>
-<td align="left">CHG &lt;= -5</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= 15</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= -10</td>
-<td align="left">Y</td>
-</tr>
-<tr class="odd">
-<td align="left">01-701-1015</td>
-<td align="left">FBCVA</td>
-<td align="right">24</td>
-<td align="right">-11</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= 25</td>
-<td align="left">Y</td>
-<td align="left">CHG &lt;= -5</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= 15</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= -10</td>
-<td align="left">N</td>
-</tr>
-<tr class="even">
-<td align="left">01-701-1015</td>
-<td align="left">FBCVA</td>
-<td align="right">62</td>
-<td align="right">27</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= 25</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= -5</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= 15</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= -10</td>
-<td align="left">Y</td>
-</tr>
-<tr class="odd">
-<td align="left">01-701-1015</td>
-<td align="left">FBCVA</td>
-<td align="right">31</td>
-<td align="right">-4</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= 25</td>
-<td align="left">Y</td>
-<td align="left">CHG &lt;= -5</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= 15</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= -10</td>
-<td align="left">Y</td>
-</tr>
-<tr class="even">
-<td align="left">01-701-1015</td>
-<td align="left">FBCVA</td>
-<td align="right">84</td>
-<td align="right">49</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= 25</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= -5</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= 15</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= -10</td>
-<td align="left">Y</td>
-</tr>
-<tr class="odd">
-<td align="left">01-701-1015</td>
-<td align="left">FBCVA</td>
-<td align="right">35</td>
-<td align="right">0</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= 25</td>
-<td align="left">Y</td>
-<td align="left">CHG &lt;= -5</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= 15</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= -10</td>
-<td align="left">Y</td>
-</tr>
-<tr class="even">
-<td align="left">01-701-1015</td>
-<td align="left">FBCVA</td>
-<td align="right">69</td>
-<td align="right">34</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= 25</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= -5</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= 15</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= -10</td>
-<td align="left">Y</td>
-</tr>
-<tr class="odd">
-<td align="left">01-701-1015</td>
-<td align="left">FBCVA</td>
-<td align="right">88</td>
-<td align="right">53</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= 25</td>
-<td align="left">N</td>
-<td align="left">CHG &lt;= -5</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= 15</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= -10</td>
-<td align="left">Y</td>
-</tr>
-<tr class="even">
-<td align="left">01-701-1015</td>
-<td align="left">SBCVA</td>
 <td align="right">82</td>
 <td align="right">5</td>
 <td align="left">5 &lt;= CHG &lt;= 10</td>
@@ -656,9 +511,153 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td align="left">CHG &gt;= -10</td>
 <td align="left">Y</td>
 </tr>
+<tr class="even">
+<td align="left">01-701-1015</td>
+<td align="left">FBCVA</td>
+<td align="right">77</td>
+<td align="right">0</td>
+<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 25</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= -5</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -10</td>
+<td align="left">Y</td>
+</tr>
+<tr class="odd">
+<td align="left">01-701-1015</td>
+<td align="left">FBCVA</td>
+<td align="right">77</td>
+<td align="right">0</td>
+<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 25</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= -5</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -10</td>
+<td align="left">Y</td>
+</tr>
+<tr class="even">
+<td align="left">01-701-1015</td>
+<td align="left">FBCVA</td>
+<td align="right">64</td>
+<td align="right">-13</td>
+<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 25</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= -5</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -10</td>
+<td align="left">N</td>
+</tr>
+<tr class="odd">
+<td align="left">01-701-1015</td>
+<td align="left">FBCVA</td>
+<td align="right">92</td>
+<td align="right">15</td>
+<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 25</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= -5</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= 15</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= -10</td>
+<td align="left">Y</td>
+</tr>
+<tr class="even">
+<td align="left">01-701-1015</td>
+<td align="left">FBCVA</td>
+<td align="right">41</td>
+<td align="right">-36</td>
+<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 25</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= -5</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -10</td>
+<td align="left">N</td>
+</tr>
+<tr class="odd">
+<td align="left">01-701-1015</td>
+<td align="left">FBCVA</td>
+<td align="right">52</td>
+<td align="right">-25</td>
+<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 25</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= -5</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -10</td>
+<td align="left">N</td>
+</tr>
+<tr class="even">
+<td align="left">01-701-1015</td>
+<td align="left">FBCVA</td>
+<td align="right">2</td>
+<td align="right">-75</td>
+<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 25</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= -5</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -10</td>
+<td align="left">N</td>
+</tr>
+<tr class="odd">
+<td align="left">01-701-1015</td>
+<td align="left">FBCVA</td>
+<td align="right">44</td>
+<td align="right">-33</td>
+<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 25</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= -5</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -10</td>
+<td align="left">N</td>
+</tr>
+<tr class="even">
+<td align="left">01-701-1015</td>
+<td align="left">SBCVA</td>
+<td align="right">97</td>
+<td align="right">62</td>
+<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 25</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= -5</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= 15</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= -10</td>
+<td align="left">Y</td>
+</tr>
 </tbody>
 </table>
-<p>It is also possible to assign significance to the “x” in <code>CRITxFL</code>. For instance, one could designate all criterion flags of Class 1 as <code>CRIT1yFL</code>, Class 2 as <code>CRIT2yFL</code>, and Class 3 as <code>CRIT3yFL</code>. The argument <code>critxfl_index</code> allows a simple implementation of this in conjunction with three separate calls to <code>derive_var_bcvacritxfl</code>:</p>
+<p>It is also possible to assign significance to the “x” in <code>CRITxFL</code>. For instance, one could designate all criterion flags of Class 1 as <code>CRIT1yFL</code>, Class 2 as <code>CRIT2yFL</code>, and Class 3 as <code>CRIT3yFL</code>. The argument <code>critxfl_index</code> allows a simple implementation of this in conjunction with three separate calls to <code>derive_var_bcvacritxfl()</code>:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>adbcva <span class="ot">&lt;-</span> adbcva <span class="sc">%&gt;%</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_var_bcvacritxfl</span>(</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">paramcds =</span> <span class="fu">c</span>(<span class="st">&quot;SBCVA&quot;</span>, <span class="st">&quot;FBCVA&quot;</span>),</span>
@@ -679,7 +678,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="additional-notes" class="section level2">
 <h2>Additional Notes</h2>
 <ul>
-<li>When interpreting endpoints such as <em>Loss of 5 letters or fewer relative to baseline</em>, it is implicitly assumed in this article that this also includes the case where letters are <em>gained</em>, so that the inequality reads <code>CHG &gt;= -5</code>. One would then use the <code>bcva_lowlims = list(-5)</code> argument of <code>derive_var_bcvacritxfl</code> to program such an endpoint. If this is not the case, i.e. one wishes to exclude cases of letter gains, then the inequality of interest would instead be <code>-5 &lt;= CHG &lt;= -1</code>. Importantly, <code>derive_var_bcvacritxfl</code> could still be used, but with the argument <code>bcva_ranges = list(c(-5, -1))</code>.</li>
+<li>When interpreting endpoints such as <em>Loss of 5 letters or fewer relative to baseline</em>, it is implicitly assumed in this article that this also includes the case where letters are <em>gained</em>, so that the inequality reads <code>CHG &gt;= -5</code>. One would then use the <code>bcva_lowlims = list(-5)</code> argument of <code>derive_var_bcvacritxfl()</code> to program such an endpoint. If this is not the case, i.e. one wishes to exclude cases of letter gains, then the inequality of interest would instead be <code>-5 &lt;= CHG &lt;= -1</code>. Importantly, <code>derive_var_bcvacritxfl()</code> could still be used, but with the argument <code>bcva_ranges = list(c(-5, -1))</code>.</li>
 </ul>
 </div>
 <div id="example" class="section level2">

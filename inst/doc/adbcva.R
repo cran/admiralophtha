@@ -54,11 +54,9 @@ oe <- convert_blanks_to_na(admiral_oe) %>%
 
 # ---- Lookup table ----
 param_lookup <- tibble::tribble(
-  ~OETESTCD, ~OELAT, ~STUDYEYE, ~PARAMCD, ~PARAM, ~PARAMN,
-  "VACSCORE", "RIGHT", "RIGHT", "SBCVA", "Study Eye Visual Acuity Score", 1,
-  "VACSCORE", "LEFT", "LEFT", "SBCVA", "Study Eye Visual Acuity Score", 1,
-  "VACSCORE", "RIGHT", "LEFT", "FBCVA", "Fellow Eye Visual Acuity Score", 2,
-  "VACSCORE", "LEFT", "RIGHT", "FBCVA", "Fellow Eye Visual Acuity Score", 2
+  ~OETESTCD, ~AFEYE, ~PARAMCD, ~PARAM, ~PARAMN,
+  "VACSCORE", "Study Eye", "SBCVA", "Study Eye Visual Acuity Score (letters)", 1,
+  "VACSCORE", "Fellow Eye", "FBCVA", "Fellow Eye Visual Acuity Score (letters)", 2,
 )
 
 ## -----------------------------------------------------------------------------
@@ -80,14 +78,15 @@ adbcva <- adbcva %>%
     AVAL = OESTRESN,
     AVALU = "letters",
     DTYPE = NA_character_
-  )
+  ) %>%
+  derive_var_afeye(OELOC, OELAT)
 
 ## -----------------------------------------------------------------------------
 adbcva <- adbcva %>%
   derive_vars_merged(
     dataset_add = param_lookup,
     new_vars = exprs(PARAM, PARAMCD),
-    by_vars = exprs(OETESTCD, OELAT, STUDYEYE),
+    by_vars = exprs(OETESTCD, AFEYE),
     filter_add = PARAMCD %in% c("SBCVA", "FBCVA")
   )
 
@@ -219,10 +218,9 @@ adbcva <- adbcva %>% derive_var_bcvacritxfl(
 
 ## ---- eval=TRUE, echo=FALSE---------------------------------------------------
 dataset_vignette(
-  adbcva %>% filter(USUBJID == "01-701-1015"),
-  display_vars = exprs(
-    USUBJID, PARAMCD, AVAL, CHG, CRIT1, CRIT1FL, CRIT2, CRIT2FL, CRIT3, CRIT3FL, CRIT4, CRIT4FL, CRIT5, CRIT5FL
-  )
+  adbcva %>%
+    filter(USUBJID == "01-701-1015") %>%
+    select(USUBJID, PARAMCD, AVAL, CHG, starts_with("CRIT"))
 )
 
 ## -----------------------------------------------------------------------------

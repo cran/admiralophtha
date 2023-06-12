@@ -29,5 +29,5 @@ dyn_link <- function(text,
   return(link(text, url))
 }
 # Other variables
-admiral_homepage <- "https://pharmaverse.github.io/admiral"
+admiral_homepage <- "https://pharmaverse.github.io/admiral/cran-release"
 

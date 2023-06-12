@@ -151,7 +151,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>This article describes creating an <code>ADVFQ</code> ADaM with Visual Functioning Questionnaire data for ophthalmology endpoints. It is to be used in conjunction with the article on <a href="https://pharmaverse.github.io/admiral/articles/bds_finding.html">creating a BDS dataset from SDTM</a>. As such, derivations and processes that are not specific to ADVFQ are absent, and the user is invited to consult the aforementioned article for guidance.</p>
+<p>This article describes creating an <code>ADVFQ</code> ADaM with Visual Functioning Questionnaire data for ophthalmology endpoints. It is to be used in conjunction with the article on <a href="https://pharmaverse.github.io/admiral/cran-release/articles/bds_finding.html">creating a BDS dataset from SDTM</a>. As such, derivations and processes that are not specific to ADVFQ are absent, and the user is invited to consult the aforementioned article for guidance.</p>
 <p><strong>Note</strong>: <em>All examples assume CDISC SDTM and/or ADaM format as input unless otherwise specified.</em></p>
 <div id="dataset-contents" class="section level2">
 <h2>Dataset Contents</h2>
@@ -201,7 +201,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;QSG02&quot;</span>, <span class="st">&quot;QSG02&quot;</span>, <span class="st">&quot;General Score 02&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Averaged Result&quot;</span>,</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;QBCSCORE&quot;</span>, <span class="st">&quot;QBCSCORE&quot;</span>, <span class="st">&quot;Composite Score&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Averaged Result&quot;</span></span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
-<p>Now the ADVFQ dataset can be constructed, merging the filtered QS dataset with ADSL. This is necessary because treatment start date <code>TRTSDT</code> is a prerequisite for the derivation of variables such as Analysis Day <code>ADY</code> which can be programmed by following the article on <a href="https://pharmaverse.github.io/admiral/articles/bds_finding.html">creating a BDS dataset from SDTM</a>.</p>
+<p>Now the ADVFQ dataset can be constructed, merging the filtered QS dataset with ADSL. This is necessary because treatment start date <code>TRTSDT</code> is a prerequisite for the derivation of variables such as Analysis Day <code>ADY</code> which can be programmed by following the article on <a href="https://pharmaverse.github.io/admiral/cran-release/articles/bds_finding.html">creating a BDS dataset from SDTM</a>.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>adsl_vars <span class="ot">&lt;-</span> <span class="fu">exprs</span>(TRTSDT, TRTEDT, TRT01A, TRT01P)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> <span class="fu">derive_vars_merged</span>(</span>
