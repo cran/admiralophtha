@@ -35,12 +35,12 @@ library(admiraldev)
 ## ---- warning=FALSE, message=FALSE--------------------------------------------
 library(dplyr)
 library(admiral)
-library(admiral.test)
+library(pharmaversesdtm)
 library(admiraldev)
 library(admiralophtha)
 
 ## -----------------------------------------------------------------------------
-data("admiral_oe")
+data("oe_ophtha")
 data("admiral_adsl")
 
 # Add STUDYEYE to ADSL to simulate an ophtha dataset
@@ -49,14 +49,14 @@ adsl <- admiral_adsl %>%
   mutate(STUDYEYE = sample(c("LEFT", "RIGHT"), n(), replace = TRUE)) %>%
   convert_blanks_to_na()
 
-oe <- convert_blanks_to_na(admiral_oe) %>%
+oe <- convert_blanks_to_na(oe_ophtha) %>%
   ungroup()
 
 # ---- Lookup table ----
 param_lookup <- tibble::tribble(
-  ~OETESTCD, ~AFEYE, ~PARAMCD, ~PARAM, ~PARAMN,
-  "VACSCORE", "Study Eye", "SBCVA", "Study Eye Visual Acuity Score (letters)", 1,
-  "VACSCORE", "Fellow Eye", "FBCVA", "Fellow Eye Visual Acuity Score (letters)", 2,
+  ~OETESTCD, ~OECAT, ~OESCAT, ~AFEYE, ~PARAMCD, ~PARAM, ~PARAMN,
+  "VACSCORE", "BEST CORRECTED VISUAL ACUITY", "OVERALL EVALUATION", "Study Eye", "SBCVA", "Study Eye Visual Acuity Score (letters)", 1, # nolint
+  "VACSCORE", "BEST CORRECTED VISUAL ACUITY", "OVERALL EVALUATION", "Fellow Eye", "FBCVA", "Fellow Eye Visual Acuity Score (letters)", 2, # nolint
 )
 
 ## -----------------------------------------------------------------------------
@@ -209,11 +209,15 @@ dataset_vignette(
 )
 
 ## -----------------------------------------------------------------------------
-adbcva <- adbcva %>% derive_var_bcvacritxfl(
-  paramcds = c("SBCVA", "FBCVA"),
-  bcva_ranges = list(c(5, 10)),
-  bcva_uplims = list(25, -5),
-  bcva_lowlims = list(15, -10)
+adbcva <- adbcva %>% restrict_derivation(
+  derivation = derive_var_bcvacritxfl,
+  args = params(
+    crit_var = exprs(CHG),
+    bcva_ranges = list(c(5, 10)),
+    bcva_uplims = list(25, -5),
+    bcva_lowlims = list(15, -10)
+  ),
+  filter = PARAMCD %in% c("SBCVA", "FBCVA")
 )
 
 ## ---- eval=TRUE, echo=FALSE---------------------------------------------------
@@ -225,19 +229,31 @@ dataset_vignette(
 
 ## -----------------------------------------------------------------------------
 adbcva <- adbcva %>%
-  derive_var_bcvacritxfl(
-    paramcds = c("SBCVA", "FBCVA"),
-    bcva_ranges = list(c(5, 10)),
-    critxfl_index = 10
+  restrict_derivation(
+    derivation = derive_var_bcvacritxfl,
+    args = params(
+      crit_var = exprs(CHG),
+      bcva_ranges = list(c(5, 10)),
+      critxfl_index = 10
+    ),
+    filter = PARAMCD %in% c("SBCVA", "FBCVA")
   ) %>%
-  derive_var_bcvacritxfl(
-    paramcds = c("SBCVA", "FBCVA"),
-    bcva_uplims = list(25, -5),
-    critxfl_index = 20
+  restrict_derivation(
+    derivation = derive_var_bcvacritxfl,
+    args = params(
+      crit_var = exprs(CHG),
+      bcva_uplims = list(25, -5),
+      critxfl_index = 20
+    ),
+    filter = PARAMCD %in% c("SBCVA", "FBCVA")
   ) %>%
-  derive_var_bcvacritxfl(
-    paramcds = c("SBCVA", "FBCVA"),
-    bcva_lowlims = list(15, -10),
-    critxfl_index = 30
+  restrict_derivation(
+    derivation = derive_var_bcvacritxfl,
+    args = params(
+      crit_var = exprs(CHG),
+      bcva_lowlims = list(15, -10),
+      critxfl_index = 30
+    ),
+    filter = PARAMCD %in% c("SBCVA", "FBCVA")
   )
 

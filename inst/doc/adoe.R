@@ -35,12 +35,12 @@ library(admiraldev)
 ## ---- warning=FALSE, message=FALSE--------------------------------------------
 library(dplyr)
 library(admiral)
-library(admiral.test)
+library(pharmaversesdtm)
 library(admiraldev)
 library(admiralophtha)
 
 ## -----------------------------------------------------------------------------
-data("admiral_oe")
+data("oe_ophtha")
 data("admiral_adsl")
 
 # Add STUDYEYE to ADSL to simulate an ophtha dataset
@@ -49,18 +49,18 @@ adsl <- admiral_adsl %>%
   mutate(STUDYEYE = sample(c("LEFT", "RIGHT"), n(), replace = TRUE)) %>%
   convert_blanks_to_na()
 
-oe <- convert_blanks_to_na(admiral_oe) %>%
+oe <- convert_blanks_to_na(oe_ophtha) %>%
   ungroup()
 
 # ---- Lookup table ----
 
 # Assign PARAMCD, PARAM, and PARAMN
 param_lookup <- tibble::tribble(
-  ~OETESTCD, ~AFEYE, ~PARAMCD, ~PARAM, ~PARAMN,
-  "CSUBTH", "Study Eye", "SCSUBTH", "Study Eye Center Subfield Thickness (um)", 1,
-  "CSUBTH", "Fellow Eye", "FCSUBTH", "Fellow Eye Center Subfield Thickness (um)", 2,
-  "DRSSR", "Study Eye", "SDRSSR", "Study Eye Diabetic Retinopathy Severity", 3,
-  "DRSSR", "Fellow Eye", "FDRSSR", "Fellow Eye Diabetic Retinopathy Severity", 4,
+  ~OETESTCD, ~OECAT, ~OESCAT, ~AFEYE, ~PARAMCD, ~PARAM, ~PARAMN,
+  "CSUBTH", "OPHTHALMIC ASSESSMENTS", "SD-OCT CST SINGLE FORM", "Study Eye", "SCSUBTH", "Study Eye Center Subfield Thickness (um)", 1, # nolint
+  "CSUBTH", "OPHTHALMIC ASSESSMENTS", "SD-OCT CST SINGLE FORM", "Fellow Eye", "FCSUBTH", "Fellow Eye Center Subfield Thickness (um)", 2, # nolint
+  "DRSSR", "OPHTHALMIC ASSESSMENTS", "SD-OCT CST SINGLE FORM", "Study Eye", "SDRSSR", "Study Eye Diabetic Retinopathy Severity", 3, # nolint
+  "DRSSR", "OPHTHALMIC ASSESSMENTS", "SD-OCT CST SINGLE FORM", "Fellow Eye", "FDRSSR", "Fellow Eye Diabetic Retinopathy Severity", 4, # nolint
 )
 
 ## -----------------------------------------------------------------------------
@@ -75,4 +75,16 @@ adoe <- oe %>%
     new_vars = adsl_vars,
     by_vars = exprs(STUDYID, USUBJID)
   )
+
+## -----------------------------------------------------------------------------
+adoe <- adoe %>%
+  # Calculate AVAL, AVALC, AVALU and DTYPE
+  mutate(
+    AVAL = OESTRESN,
+    AVALC = OESTRESC,
+    AVALU = OESTRESU,
+    DTYPE = NA_character_
+  ) %>%
+  # Derive AFEYE needed for PARAMCD derivation
+  derive_var_afeye(OELOC, OELAT, loc_vals = c("EYE", "RETINA"))
 

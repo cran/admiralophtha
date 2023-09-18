@@ -1,7 +1,7 @@
 Package: admiralophtha
 Type: Package
 Title: ADaM in R Asset Library - Ophthalmology
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: c(
     person("Edoardo", "Mancini", email = "edoardo.mancini@roche.com", role = c("aut", "cre")),
     person("Ritika", "Aggarwal", email = "ritika.aggarwal@novartis.com", role = c("aut")),
@@ -33,12 +33,12 @@ RoxygenNote: 7.2.3
 Depends: R (>= 3.5)
 Imports: admiral, admiraldev, dplyr, lubridate, magrittr, purrr, rlang,
         stringr, hms, tidyr, tidyselect, lifecycle
-Suggests: admiral.test, devtools, diffdf, lintr, pkgdown, testthat,
+Suggests: pharmaversesdtm, devtools, diffdf, lintr, pkgdown, testthat,
         knitr, methods, miniUI, rmarkdown, roxygen2, spelling, tibble,
         usethis, covr, DT
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-06-12 08:47:47 UTC; mancinie
+Packaged: 2023-09-18 09:58:59 UTC; mancinie
 Author: Edoardo Mancini [aut, cre],
   Ritika Aggarwal [aut],
   Jane Gao [aut],
@@ -53,4 +53,4 @@ Author: Edoardo Mancini [aut, cre],
   Aldrich Salva [aut]
 Maintainer: Edoardo Mancini <edoardo.mancini@roche.com>
 Repository: CRAN
-Date/Publication: 2023-06-12 09:10:13 UTC
+Date/Publication: 2023-09-18 11:10:02 UTC

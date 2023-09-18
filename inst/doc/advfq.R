@@ -34,15 +34,15 @@ admiral_homepage <- "https://pharmaverse.github.io/admiral"
 ## ---- warning=FALSE, message=FALSE--------------------------------------------
 library(dplyr)
 library(admiral)
-library(admiral.test)
+library(pharmaversesdtm)
 library(admiraldev)
 library(admiralophtha)
 
 ## -----------------------------------------------------------------------------
 data("admiral_adsl")
-data("admiral_qs")
+data("qs_ophtha")
 adsl <- admiral_adsl
-qs <- admiral_qs
+qs <- qs_ophtha
 
 qs <- qs %>% filter(QSTESTCD %in% c("VFQ1", "VFQ2", "VFQ3", "VFQ4"))
 
