@@ -13,39 +13,12 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-link <- function(text, url) {
-  return(
-    paste0(
-      "[", text, "]",
-      "(", url, ")"
-    )
-  )
-}
-dyn_link <- function(text,
-                     base_url,
-                     relative_url = "",
-                     # Change to TRUE when admiral adopts multiversion docs
-                     is_multiversion = FALSE,
-                     multiversion_default_ref = "main") {
-  url <- paste(base_url, relative_url, sep = "/")
-  if (is_multiversion) {
-    url <- paste(
-      base_url,
-      Sys.getenv("BRANCH_NAME", multiversion_default_ref),
-      relative_url,
-      sep = "/"
-    )
-  }
-  return(link(text, url))
-}
-# Other variables
-admiral_homepage <- "https://pharmaverse.github.io/admiral"
 library(admiraldev)
 ```
 
 # Introduction
 
-This article describes creating an ADOE ADaM with Ophthalmology Exam Analysis data for ophthalmology endpoints. It is to be used in conjunction with the article on [creating a BDS dataset from SDTM](https://pharmaverse.github.io/admiral/cran-release/articles/bds_finding.html). As such, derivations and processes that are not specific to ADOE are absent, and the user is invited to consult the aforementioned article for guidance.
+This article describes creating an ADOE ADaM with Ophthalmology Exam Analysis data for ophthalmology endpoints. It is to be used in conjunction with the article on [creating a BDS dataset from SDTM](https://pharmaverse.github.io/admiral/articles/bds_finding.html). As such, derivations and processes that are not specific to ADOE are absent, and the user is invited to consult the aforementioned article for guidance.
 
 As the current release of `{admiralophtha}` does not contain any functionality specific to ADOE, this article only showcases how to map parameters from OE in order to set up the basic structure of ADOE. For the following steps, the user is invited to consult the above-linked article on BDS datasets. This article will be updated for future releases to showcase and explain any `{admiralophtha}`-specific functionality.
 
@@ -133,15 +106,15 @@ adoe <- adoe %>%
     DTYPE = NA_character_
   ) %>%
   # Derive AFEYE needed for PARAMCD derivation
-  derive_var_afeye(OELOC, OELAT, loc_vals = c("EYE", "RETINA"))
+  derive_var_afeye(loc_var = OELOC, lat_var = OELAT, loc_vals = c("EYE", "RETINA"))
 ```
 ## Further Derivations of Standard BDS Variables {#further}
 
-The user is invited to consult the article on [creating a BDS dataset from SDTM](https://pharmaverse.github.io/admiral/cran-release/articles/bds_finding.html) to learn how to add standard BDS variables to ADOE. 
+The user is invited to consult the article on [creating a BDS dataset from SDTM](https://pharmaverse.github.io/admiral/articles/bds_finding.html) to learn how to add standard BDS variables to ADOE. 
 
 ## Example Script {#example}
 
 ADaM | Sample Code 
  ---- | -------------- 
-ADOE | `r dyn_link("ad_adoe.R", "https://github.com/pharmaverse/admiralophtha/blob", "inst/templates/ad_adoe.R", is_multiversion = TRUE)`
+ADOE | [ad_adoe.R](https://github.com/pharmaverse/admiralophtha/blob/main/inst/templates/ad_adoe.R)
 

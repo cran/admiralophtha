@@ -13,39 +13,12 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-link <- function(text, url) {
-  return(
-    paste0(
-      "[", text, "]",
-      "(", url, ")"
-    )
-  )
-}
-dyn_link <- function(text,
-                     base_url,
-                     relative_url = "",
-                     # Change to TRUE when admiral adopts multiversion docs
-                     is_multiversion = FALSE,
-                     multiversion_default_ref = "main") {
-  url <- paste(base_url, relative_url, sep = "/")
-  if (is_multiversion) {
-    url <- paste(
-      base_url,
-      Sys.getenv("BRANCH_NAME", multiversion_default_ref),
-      relative_url,
-      sep = "/"
-    )
-  }
-  return(link(text, url))
-}
-# Other variables
-admiral_homepage <- "https://pharmaverse.github.io/admiral"
 ```
 
 # Introduction
 
 This article describes creating an ADVFQ ADaM with Visual Functioning Questionnaire
-data for ophthalmology endpoints. It is to be used in conjunction with the article on [creating a BDS dataset from SDTM](https://pharmaverse.github.io/admiral/cran-release/articles/bds_finding.html). As such, derivations and processes that are not specific to ADVFQ are absent, and the user is invited to consult the aforementioned article for guidance.
+data for ophthalmology endpoints. It is to be used in conjunction with the article on [creating a BDS dataset from SDTM](https://pharmaverse.github.io/admiral/articles/bds_finding.html). As such, derivations and processes that are not specific to ADVFQ are absent, and the user is invited to consult the aforementioned article for guidance.
 
  **Note**: *All examples assume CDISC SDTM and/or ADaM format as input unless
  otherwise specified.* 
@@ -107,7 +80,7 @@ param_lookup <- tibble::tribble(
   "QBCSCORE", "QBCSCORE", "Composite Score", "NEI VFQ-25", "Averaged Result"
 )
 ```
-Now the ADVFQ dataset can be constructed, merging the filtered QS dataset with ADSL. This is necessary because treatment start date `TRTSDT` is a prerequisite for the derivation of variables such as Analysis Day `ADY` which can be programmed by following the article on [creating a BDS dataset from SDTM](https://pharmaverse.github.io/admiral/cran-release/articles/bds_finding.html).
+Now the ADVFQ dataset can be constructed, merging the filtered QS dataset with ADSL. This is necessary because treatment start date `TRTSDT` is a prerequisite for the derivation of variables such as Analysis Day `ADY` which can be programmed by following the article on [creating a BDS dataset from SDTM](https://pharmaverse.github.io/admiral/articles/bds_finding.html).
 ```{r, eval=FALSE}
 adsl_vars <- exprs(TRTSDT, TRTEDT, TRT01A, TRT01P)
 
@@ -153,11 +126,13 @@ Run this section of code for every question that you need recoding. This gives a
 # else set to 0 if [advfq.AVAL] = 5
 advfq <- advfq %>%
   derive_summary_records(
+    dataset_add = advfq,
     by_vars = exprs(STUDYID, USUBJID, !!!adsl_vars, PARAMCD, VISITNUM, VISIT),
-    filter = QSTESTCD == "VFQ1" & !is.na(AVAL),
-    analysis_var = AVAL,
-    summary_fun = identity,
-    set_values_to = exprs(PARAMCD = "QR01")
+    filter_add = QSTESTCD == "VFQ1" & !is.na(AVAL),
+    set_values_to = exprs(
+      AVAL = identity(AVAL),
+      PARAMCD = "QR01"
+    )
   ) %>%
   mutate(AVAL = ifelse(PARAMCD == "QR01",
     case_when(
@@ -179,11 +154,13 @@ Next, the programmer should create summary records as average of recoded questio
 # Average of QR01 and QR02 records
 advfq <- advfq %>%
   derive_summary_records(
+    dataset_add = advfq,
     by_vars = exprs(STUDYID, USUBJID, !!!adsl_vars, VISITNUM, VISIT, ADT, ADY),
-    filter = PARAMCD %in% c("QR01", "QR02") & !is.na(AVAL),
-    analysis_var = AVAL,
-    summary_fun = mean,
-    set_values_to = exprs(PARAMCD = "QSG01")
+    filter_add = PARAMCD %in% c("QR01", "QR02") & !is.na(AVAL),
+    set_values_to = exprs(
+      AVAL = mean(AVAL),
+      PARAMCD = "QSG01"
+    )
   )
 ```
 
@@ -241,4 +218,5 @@ advfq <- advfq %>%
 
 ADaM | Sample Code 
  ---- | -------------- 
-ADVFQ | `r dyn_link("ad_advfq.R", "https://github.com/pharmaverse/admiralophtha/blob", "inst/templates/ad_advfq.R", is_multiversion = TRUE)`
+ADVFQ | [ad_advfq.R](https://github.com/pharmaverse/admiralophtha/blob/main/inst/templates/ad_advfq.R)
+

@@ -344,7 +344,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1>Introduction</h1>
 <p>This article describes creating an ADOE ADaM with Ophthalmology Exam
 Analysis data for ophthalmology endpoints. It is to be used in
-conjunction with the article on <a href="https://pharmaverse.github.io/admiral/cran-release/articles/bds_finding.html">creating
+conjunction with the article on <a href="https://pharmaverse.github.io/admiral/articles/bds_finding.html">creating
 a BDS dataset from SDTM</a>. As such, derivations and processes that are
 not specific to ADOE are absent, and the user is invited to consult the
 aforementioned article for guidance.</p>
@@ -449,11 +449,11 @@ variable created from the previous step.</p>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">DTYPE =</span> <span class="cn">NA_character_</span></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Derive AFEYE needed for PARAMCD derivation</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_var_afeye</span>(OELOC, OELAT, <span class="at">loc_vals =</span> <span class="fu">c</span>(<span class="st">&quot;EYE&quot;</span>, <span class="st">&quot;RETINA&quot;</span>))</span></code></pre></div>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_var_afeye</span>(<span class="at">loc_var =</span> OELOC, <span class="at">lat_var =</span> OELAT, <span class="at">loc_vals =</span> <span class="fu">c</span>(<span class="st">&quot;EYE&quot;</span>, <span class="st">&quot;RETINA&quot;</span>))</span></code></pre></div>
 </div>
 <div id="further" class="section level2">
 <h2>Further Derivations of Standard BDS Variables</h2>
-<p>The user is invited to consult the article on <a href="https://pharmaverse.github.io/admiral/cran-release/articles/bds_finding.html">creating
+<p>The user is invited to consult the article on <a href="https://pharmaverse.github.io/admiral/articles/bds_finding.html">creating
 a BDS dataset from SDTM</a> to learn how to add standard BDS variables
 to ADOE.</p>
 </div>

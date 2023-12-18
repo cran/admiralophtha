@@ -3,33 +3,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-link <- function(text, url) {
-  return(
-    paste0(
-      "[", text, "]",
-      "(", url, ")"
-    )
-  )
-}
-dyn_link <- function(text,
-                     base_url,
-                     relative_url = "",
-                     # Change to TRUE when admiral adopts multiversion docs
-                     is_multiversion = FALSE,
-                     multiversion_default_ref = "main") {
-  url <- paste(base_url, relative_url, sep = "/")
-  if (is_multiversion) {
-    url <- paste(
-      base_url,
-      Sys.getenv("BRANCH_NAME", multiversion_default_ref),
-      relative_url,
-      sep = "/"
-    )
-  }
-  return(link(text, url))
-}
-# Other variables
-admiral_homepage <- "https://pharmaverse.github.io/admiral"
 
 ## ---- warning=FALSE, message=FALSE--------------------------------------------
 library(dplyr)
@@ -95,11 +68,13 @@ qs <- qs %>% filter(QSTESTCD %in% c("VFQ1", "VFQ2", "VFQ3", "VFQ4"))
 #  # else set to 0 if [advfq.AVAL] = 5
 #  advfq <- advfq %>%
 #    derive_summary_records(
+#      dataset_add = advfq,
 #      by_vars = exprs(STUDYID, USUBJID, !!!adsl_vars, PARAMCD, VISITNUM, VISIT),
-#      filter = QSTESTCD == "VFQ1" & !is.na(AVAL),
-#      analysis_var = AVAL,
-#      summary_fun = identity,
-#      set_values_to = exprs(PARAMCD = "QR01")
+#      filter_add = QSTESTCD == "VFQ1" & !is.na(AVAL),
+#      set_values_to = exprs(
+#        AVAL = identity(AVAL),
+#        PARAMCD = "QR01"
+#      )
 #    ) %>%
 #    mutate(AVAL = ifelse(PARAMCD == "QR01",
 #      case_when(
@@ -118,11 +93,13 @@ qs <- qs %>% filter(QSTESTCD %in% c("VFQ1", "VFQ2", "VFQ3", "VFQ4"))
 #  # Average of QR01 and QR02 records
 #  advfq <- advfq %>%
 #    derive_summary_records(
+#      dataset_add = advfq,
 #      by_vars = exprs(STUDYID, USUBJID, !!!adsl_vars, VISITNUM, VISIT, ADT, ADY),
-#      filter = PARAMCD %in% c("QR01", "QR02") & !is.na(AVAL),
-#      analysis_var = AVAL,
-#      summary_fun = mean,
-#      set_values_to = exprs(PARAMCD = "QSG01")
+#      filter_add = PARAMCD %in% c("QR01", "QR02") & !is.na(AVAL),
+#      set_values_to = exprs(
+#        AVAL = mean(AVAL),
+#        PARAMCD = "QSG01"
+#      )
 #    )
 
 ## ---- eval=FALSE--------------------------------------------------------------

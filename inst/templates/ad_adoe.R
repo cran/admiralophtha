@@ -66,7 +66,7 @@ adoe_aval <- adoe_adslvar %>%
     DTYPE = NA_character_
   ) %>%
   # Derive AFEYE needed for PARAMCD derivation
-  derive_var_afeye(OELOC, OELAT, loc_vals = c("EYE", "RETINA"))
+  derive_var_afeye(loc_var = OELOC, lat_var = OELAT, loc_vals = c("EYE", "RETINA"))
 
 adoe_param <- adoe_aval %>%
   # Add PARAM, PARAMCD
@@ -198,10 +198,10 @@ admiralophtha_adoe <- adoe_adsl
 
 # Save output ----
 
-dir <- file.path(getwd(), "tmp")
-print(dir)
+dir <- tools::R_user_dir("admiralophtha_templates_data", which = "cache")
+# Change to whichever directory you want to save the dataset in
 if (!file.exists(dir)) {
   # Create the folder
-  dir.create(dir)
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 }
 save(admiralophtha_adoe, file = file.path(dir, "adoe.rda"), compress = "bzip2")

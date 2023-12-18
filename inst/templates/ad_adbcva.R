@@ -123,7 +123,7 @@ adbcva_aval <- adbcva_adslvar %>%
     DTYPE = NA_character_
   ) %>%
   # Derive AFEYE needed for PARAMCD derivation
-  derive_var_afeye(OELOC, OELAT)
+  derive_var_afeye(loc_var = OELOC, lat_var = OELAT)
 
 adbcva_nlogparam <- adbcva_aval %>%
   # Add PARAM, PARAMCD for non log parameters
@@ -139,8 +139,8 @@ adbcva_logparam <- adbcva_nlogparam %>%
   derive_param_computed(
     by_vars = c(exprs(STUDYID, USUBJID, VISIT, VISITNUM, OEDY, OEDTC, AFEYE), adsl_vars),
     parameters = c("SBCVA"),
-    analysis_value = convert_etdrs_to_logmar(AVAL.SBCVA),
     set_values_to = exprs(
+      AVAL = convert_etdrs_to_logmar(AVAL.SBCVA),
       PARAMCD = "SBCVALOG",
       PARAM = "Study Eye Visual Acuity LogMAR Score",
       DTYPE = NA_character_,
@@ -150,8 +150,8 @@ adbcva_logparam <- adbcva_nlogparam %>%
   derive_param_computed(
     by_vars = c(exprs(STUDYID, USUBJID, VISIT, OEDY, OEDTC, AFEYE), adsl_vars),
     parameters = c("FBCVA"),
-    analysis_value = convert_etdrs_to_logmar(AVAL.FBCVA),
     set_values_to = exprs(
+      AVAL = convert_etdrs_to_logmar(AVAL.FBCVA),
       PARAMCD = "FBCVALOG",
       PARAM = "Fellow Eye Visual Acuity LogMAR Score",
       DTYPE = NA_character_,
@@ -302,10 +302,10 @@ admiralophtha_adbcva <- adbcva_crtflag
 
 # Save output ----
 
-dir <- file.path(getwd(), "tmp")
-print(dir)
+dir <- tools::R_user_dir("admiralophtha_templates_data", which = "cache")
+# Change to whichever directory you want to save the dataset in
 if (!file.exists(dir)) {
   # Create the folder
-  dir.create(dir)
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 }
 save(admiralophtha_adbcva, file = file.path(dir, "adbcva.rda"), compress = "bzip2")

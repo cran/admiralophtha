@@ -1,7 +1,7 @@
 Package: admiralophtha
 Type: Package
 Title: ADaM in R Asset Library - Ophthalmology
-Version: 0.3.0
+Version: 1.0.0
 Authors@R: c(
     person("Edoardo", "Mancini", email = "edoardo.mancini@roche.com", role = c("aut", "cre")),
     person("Ritika", "Aggarwal", email = "ritika.aggarwal@novartis.com", role = c("aut")),
@@ -38,7 +38,7 @@ Suggests: pharmaversesdtm, devtools, diffdf, lintr, pkgdown, testthat,
         usethis, covr, DT
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-09-18 09:58:59 UTC; mancinie
+Packaged: 2023-12-17 09:53:31 UTC; mancinie
 Author: Edoardo Mancini [aut, cre],
   Ritika Aggarwal [aut],
   Jane Gao [aut],
@@ -53,4 +53,4 @@ Author: Edoardo Mancini [aut, cre],
   Aldrich Salva [aut]
 Maintainer: Edoardo Mancini <edoardo.mancini@roche.com>
 Repository: CRAN
-Date/Publication: 2023-09-18 11:10:02 UTC
+Date/Publication: 2023-12-18 08:50:18 UTC
