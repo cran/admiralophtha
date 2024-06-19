@@ -5,7 +5,7 @@ knitr::opts_chunk$set(
 )
 library(admiraldev)
 
-## ---- warning=FALSE, message=FALSE--------------------------------------------
+## ----warning=FALSE, message=FALSE---------------------------------------------
 library(dplyr)
 library(admiral)
 library(pharmaversesdtm)
@@ -42,7 +42,7 @@ adbcva <- oe %>%
   derive_vars_merged(
     dataset_add = adsl,
     new_vars = adsl_vars,
-    by_vars = exprs(STUDYID, USUBJID)
+    by_vars = get_admiral_option("subject_keys")
   )
 
 ## -----------------------------------------------------------------------------
@@ -66,7 +66,10 @@ adbcva <- adbcva %>%
 ## -----------------------------------------------------------------------------
 adbcva <- adbcva %>%
   derive_param_computed(
-    by_vars = c(exprs(STUDYID, USUBJID, VISIT, VISITNUM, OEDY, OEDTC, AFEYE), adsl_vars),
+    by_vars = c(
+      get_admiral_option("subject_keys"),
+      exprs(VISIT, VISITNUM, OEDY, OEDTC, AFEYE, !!!adsl_vars)
+    ),
     parameters = c("SBCVA"),
     set_values_to = exprs(
       AVAL = convert_etdrs_to_logmar(AVAL.SBCVA),
@@ -77,7 +80,10 @@ adbcva <- adbcva %>%
     )
   ) %>%
   derive_param_computed(
-    by_vars = c(exprs(STUDYID, USUBJID, VISIT, OEDY, OEDTC, AFEYE), adsl_vars),
+    by_vars = c(
+      get_admiral_option("subject_keys"),
+      exprs(VISIT, VISITNUM, OEDY, OEDTC, AFEYE, !!!adsl_vars)
+    ),
     parameters = c("FBCVA"),
     set_values_to = exprs(
       AVAL = convert_etdrs_to_logmar(AVAL.FBCVA),
@@ -173,7 +179,7 @@ adbcva <- adbcva %>%
     by = exprs(PARAMCD, AVALCA1N)
   )
 
-## ---- eval=TRUE, echo=FALSE---------------------------------------------------
+## ----eval=TRUE, echo=FALSE----------------------------------------------------
 dataset_vignette(
   adbcva %>% filter(USUBJID == "01-701-1015"),
   display_vars = exprs(
@@ -193,7 +199,7 @@ adbcva <- adbcva %>% restrict_derivation(
   filter = PARAMCD %in% c("SBCVA", "FBCVA")
 )
 
-## ---- eval=TRUE, echo=FALSE---------------------------------------------------
+## ----eval=TRUE, echo=FALSE----------------------------------------------------
 dataset_vignette(
   adbcva %>%
     filter(USUBJID == "01-701-1015") %>%

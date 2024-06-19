@@ -5,7 +5,7 @@ knitr::opts_chunk$set(
 )
 library(admiraldev)
 
-## ---- warning=FALSE, message=FALSE--------------------------------------------
+## ----warning=FALSE, message=FALSE---------------------------------------------
 library(dplyr)
 library(admiral)
 library(pharmaversesdtm)
@@ -46,7 +46,7 @@ adoe <- oe %>%
   derive_vars_merged(
     dataset_add = adsl,
     new_vars = adsl_vars,
-    by_vars = exprs(STUDYID, USUBJID)
+    by_vars = get_admiral_option("subject_keys")
   )
 
 ## -----------------------------------------------------------------------------

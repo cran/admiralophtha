@@ -422,7 +422,7 @@ a BDS dataset from SDTM</a>.</p>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  qs,</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">dataset_add =</span> adsl,</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">new_vars =</span> adsl_vars,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">by_vars =</span> <span class="fu">exprs</span>(STUDYID, USUBJID)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>)</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 <div id="aval" class="section level2">
@@ -460,23 +460,26 @@ recoding. This gives an example of recoding one question.</p>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_summary_records</span>(</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset_add =</span> advfq,</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">exprs</span>(STUDYID, USUBJID, <span class="sc">!!!</span>adsl_vars, PARAMCD, VISITNUM, VISIT),</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">filter_add =</span> QSTESTCD <span class="sc">==</span> <span class="st">&quot;VFQ1&quot;</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(AVAL),</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">set_values_to =</span> <span class="fu">exprs</span>(</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">AVAL =</span> <span class="fu">identity</span>(AVAL),</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">PARAMCD =</span> <span class="st">&quot;QR01&quot;</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AVAL =</span> <span class="fu">ifelse</span>(PARAMCD <span class="sc">==</span> <span class="st">&quot;QR01&quot;</span>,</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">case_when</span>(</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">100</span>,</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">2</span> <span class="sc">~</span> <span class="dv">75</span>,</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">3</span> <span class="sc">~</span> <span class="dv">50</span>,</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">4</span> <span class="sc">~</span> <span class="dv">25</span>,</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">~</span> <span class="dv">0</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    AVAL</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>  ))</span></code></pre></div>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">c</span>(</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>),</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">exprs</span>(<span class="sc">!!!</span>adsl_vars, PARAMCD, VISITNUM, VISIT)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">filter_add =</span> QSTESTCD <span class="sc">==</span> <span class="st">&quot;VFQ1&quot;</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(AVAL),</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">set_values_to =</span> <span class="fu">exprs</span>(</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">AVAL =</span> <span class="fu">identity</span>(AVAL),</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">PARAMCD =</span> <span class="st">&quot;QR01&quot;</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AVAL =</span> <span class="fu">ifelse</span>(PARAMCD <span class="sc">==</span> <span class="st">&quot;QR01&quot;</span>,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">case_when</span>(</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">100</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">2</span> <span class="sc">~</span> <span class="dv">75</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">3</span> <span class="sc">~</span> <span class="dv">50</span>,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">4</span> <span class="sc">~</span> <span class="dv">25</span>,</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">~</span> <span class="dv">0</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    AVAL</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  ))</span></code></pre></div>
 <p>Next, the programmer should create summary records as average of
 recoded questions using <code>admiral::derive_summary_records</code>.
 This example uses two of the recoded questions to create an average
@@ -487,13 +490,16 @@ record.</p>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_summary_records</span>(</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset_add =</span> advfq,</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">exprs</span>(STUDYID, USUBJID, <span class="sc">!!!</span>adsl_vars, VISITNUM, VISIT, ADT, ADY),</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">filter_add =</span> PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;QR01&quot;</span>, <span class="st">&quot;QR02&quot;</span>) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(AVAL),</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">set_values_to =</span> <span class="fu">exprs</span>(</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">AVAL =</span> <span class="fu">mean</span>(AVAL),</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">PARAMCD =</span> <span class="st">&quot;QSG01&quot;</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">c</span>(</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>),</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">exprs</span>(<span class="sc">!!!</span>adsl_vars, VISITNUM, VISIT, ADT, ADY)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">filter_add =</span> PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;QR01&quot;</span>, <span class="st">&quot;QR02&quot;</span>) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(AVAL),</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">set_values_to =</span> <span class="fu">exprs</span>(</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">AVAL =</span> <span class="fu">mean</span>(AVAL),</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">PARAMCD =</span> <span class="st">&quot;QSG01&quot;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
 </div>
 <div id="analysis" class="section level2">
 <h2>Derive Analysis Variables</h2>
@@ -504,15 +510,16 @@ subject has multiple observations within a particular timing period.</p>
 be used to choose the appropriate record for analysis.</p>
 <p>This flag may be derived using the <a href="https://pharmaverse.github.io/admiral/"><code>admiral</code></a>
 function <code>admiral::derive_var_extreme_flag()</code>. For this
-example, we will assume we would like to choose the latest value by
-<code>USUBJID</code>, <code>PARAMCD</code> and <code>AVISIT</code>.</p>
+example, we will assume we would like to choose the latest value by our
+subject keys along with <code>PARAMCD</code> and
+<code>AVISIT</code>.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ANL01FL: Flag last result within an AVISIT for post-baseline records ----</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">restrict_derivation</span>(</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">derivation =</span> derive_var_extreme_flag,</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">args =</span> <span class="fu">params</span>(</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">new_var =</span> ANL01FL,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">by_vars =</span> <span class="fu">exprs</span>(USUBJID, PARAMCD, AVISIT),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">by_vars =</span> <span class="fu">c</span>(<span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>), <span class="fu">exprs</span>(PARAMCD, AVISIT)),</span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">order =</span> <span class="fu">exprs</span>(ADT, AVAL),</span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">mode =</span> <span class="st">&quot;last&quot;</span></span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    ),</span>
@@ -528,7 +535,7 @@ table.</p>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate ASEQ</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_var_obs_number</span>(</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">new_var =</span> ASEQ,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">exprs</span>(STUDYID, USUBJID),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>),</span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">order =</span> <span class="fu">exprs</span>(PARAMCD, ADT, AVISITN, VISITNUM),</span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">check_type =</span> <span class="st">&quot;error&quot;</span></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
@@ -544,7 +551,7 @@ which are required should be merged on to the dataset using
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_vars_merged</span>(</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset_add =</span> <span class="fu">select</span>(adsl, <span class="sc">!!!</span><span class="fu">negate_vars</span>(adsl_vars)),</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">exprs</span>(STUDYID, USUBJID)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>)</span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
 </div>
 <div id="example" class="section level2">

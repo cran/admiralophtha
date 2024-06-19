@@ -4,7 +4,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-## ---- warning=FALSE, message=FALSE--------------------------------------------
+## ----warning=FALSE, message=FALSE---------------------------------------------
 library(dplyr)
 library(admiral)
 library(pharmaversesdtm)
@@ -19,7 +19,7 @@ qs <- qs_ophtha
 
 qs <- qs %>% filter(QSTESTCD %in% c("VFQ1", "VFQ2", "VFQ3", "VFQ4"))
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  param_lookup <- tibble::tribble(
 #    ~QSTESTCD, ~PARAMCD, ~PARAM, ~PARCAT1, ~PARCAT2,
 #    "VFQ1", "VFQ1", "Overall Health", "NEI VFQ-25", "Original Response",
@@ -35,17 +35,17 @@ qs <- qs %>% filter(QSTESTCD %in% c("VFQ1", "VFQ2", "VFQ3", "VFQ4"))
 #    "QBCSCORE", "QBCSCORE", "Composite Score", "NEI VFQ-25", "Averaged Result"
 #  )
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  adsl_vars <- exprs(TRTSDT, TRTEDT, TRT01A, TRT01P)
 #  
 #  advfq <- derive_vars_merged(
 #    qs,
 #    dataset_add = adsl,
 #    new_vars = adsl_vars,
-#    by_vars = exprs(STUDYID, USUBJID)
+#    by_vars = get_admiral_option("subject_keys")
 #  )
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  advfq <- advfq %>%
 #    ## Add PARAMCD only - add PARAM etc later ----
 #    derive_vars_merged_lookup(
@@ -59,7 +59,7 @@ qs <- qs %>% filter(QSTESTCD %in% c("VFQ1", "VFQ2", "VFQ3", "VFQ4"))
 #      AVALC = QSORRES
 #    )
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  ## QR01 Recoded Item 01
 #  # set to 100 if [advfq.AVAL] = 1
 #  # else set to 75 if [advfq.AVAL] = 2
@@ -69,7 +69,10 @@ qs <- qs %>% filter(QSTESTCD %in% c("VFQ1", "VFQ2", "VFQ3", "VFQ4"))
 #  advfq <- advfq %>%
 #    derive_summary_records(
 #      dataset_add = advfq,
-#      by_vars = exprs(STUDYID, USUBJID, !!!adsl_vars, PARAMCD, VISITNUM, VISIT),
+#      by_vars = c(
+#        get_admiral_option("subject_keys"),
+#        exprs(!!!adsl_vars, PARAMCD, VISITNUM, VISIT)
+#      ),
 #      filter_add = QSTESTCD == "VFQ1" & !is.na(AVAL),
 #      set_values_to = exprs(
 #        AVAL = identity(AVAL),
@@ -87,14 +90,17 @@ qs <- qs %>% filter(QSTESTCD %in% c("VFQ1", "VFQ2", "VFQ3", "VFQ4"))
 #      AVAL
 #    ))
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  ## Derive a new record as a summary record  ----
 #  ## QSG01 General Score 01
 #  # Average of QR01 and QR02 records
 #  advfq <- advfq %>%
 #    derive_summary_records(
 #      dataset_add = advfq,
-#      by_vars = exprs(STUDYID, USUBJID, !!!adsl_vars, VISITNUM, VISIT, ADT, ADY),
+#      by_vars = c(
+#        get_admiral_option("subject_keys"),
+#        exprs(!!!adsl_vars, VISITNUM, VISIT, ADT, ADY)
+#      ),
 #      filter_add = PARAMCD %in% c("QR01", "QR02") & !is.na(AVAL),
 #      set_values_to = exprs(
 #        AVAL = mean(AVAL),
@@ -102,38 +108,38 @@ qs <- qs %>% filter(QSTESTCD %in% c("VFQ1", "VFQ2", "VFQ3", "VFQ4"))
 #      )
 #    )
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  ## ANL01FL: Flag last result within an AVISIT for post-baseline records ----
 #  advfq <- advfq %>%
 #    restrict_derivation(
 #      derivation = derive_var_extreme_flag,
 #      args = params(
 #        new_var = ANL01FL,
-#        by_vars = exprs(USUBJID, PARAMCD, AVISIT),
+#        by_vars = c(get_admiral_option("subject_keys"), exprs(PARAMCD, AVISIT)),
 #        order = exprs(ADT, AVAL),
 #        mode = "last"
 #      ),
 #      filter = !is.na(AVISITN) & ONTRTFL == "Y"
 #    )
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  ## Get ASEQ and PARAM  ----
 #  advfq <- advfq %>%
 #    # Calculate ASEQ
 #    derive_var_obs_number(
 #      new_var = ASEQ,
-#      by_vars = exprs(STUDYID, USUBJID),
+#      by_vars = get_admiral_option("subject_keys"),
 #      order = exprs(PARAMCD, ADT, AVISITN, VISITNUM),
 #      check_type = "error"
 #    ) %>%
 #    # Derive PARAM
 #    derive_vars_merged(dataset_add = select(param_lookup, -QSTESTCD), by_vars = exprs(PARAMCD))
 
-## ---- eval=FALSE--------------------------------------------------------------
+## ----eval=FALSE---------------------------------------------------------------
 #  # Add all ADSL variables
 #  advfq <- advfq %>%
 #    derive_vars_merged(
 #      dataset_add = select(adsl, !!!negate_vars(adsl_vars)),
-#      by_vars = exprs(STUDYID, USUBJID)
+#      by_vars = get_admiral_option("subject_keys")
 #    )
 
