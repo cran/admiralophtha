@@ -49,7 +49,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -60,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -359,11 +359,11 @@ placed in separate datasets (e.g. ADQS).</p>
 <div id="required-packages" class="section level2">
 <h2>Required Packages</h2>
 <p>The examples of this vignette require the following packages.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(admiral)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pharmaversesdtm)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(admiraldev)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(admiralophtha)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(admiral)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(pharmaversesdtm)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(admiraldev)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(admiralophtha)</span></code></pre></div>
 </div>
 </div>
 <div id="programming-workflow" class="section level1">
@@ -385,45 +385,45 @@ summary scores</a></li>
 dataset should be read into the environment. For the purpose of
 demonstration we shall use the <code>{admiral}</code> QS and ADSL test
 data. The QS dataset is filtered to the VFQ parameters of interest.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;admiral_adsl&quot;</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;qs_ophtha&quot;</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>adsl <span class="ot">&lt;-</span> admiral_adsl</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>qs <span class="ot">&lt;-</span> qs_ophtha</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>qs <span class="ot">&lt;-</span> qs <span class="sc">%&gt;%</span> <span class="fu">filter</span>(QSTESTCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;VFQ1&quot;</span>, <span class="st">&quot;VFQ2&quot;</span>, <span class="st">&quot;VFQ3&quot;</span>, <span class="st">&quot;VFQ4&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;admiral_adsl&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;qs_ophtha&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>adsl <span class="ot">&lt;-</span> admiral_adsl</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>qs <span class="ot">&lt;-</span> qs_ophtha</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>qs <span class="ot">&lt;-</span> qs <span class="sc">%&gt;%</span> <span class="fu">filter</span>(QSTESTCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;VFQ1&quot;</span>, <span class="st">&quot;VFQ2&quot;</span>, <span class="st">&quot;VFQ3&quot;</span>, <span class="st">&quot;VFQ4&quot;</span>))</span></code></pre></div>
 <p>Next, the programmer should create a parameter lookup table which
 includes <code>QSTESTCD</code>, <code>PARAMCD</code>,
 <code>PARAM</code>, <code>PARCAT1</code> and <code>PARCAT2</code>
 variables. This should include all parameters that will be needed in the
 final ADVFQ and will be used later to merge parameter information.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>param_lookup <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>QSTESTCD, <span class="sc">~</span>PARAMCD, <span class="sc">~</span>PARAM, <span class="sc">~</span>PARCAT1, <span class="sc">~</span>PARCAT2,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;VFQ1&quot;</span>, <span class="st">&quot;VFQ1&quot;</span>, <span class="st">&quot;Overall Health&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Original Response&quot;</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;VFQ2&quot;</span>, <span class="st">&quot;VFQ2&quot;</span>, <span class="st">&quot;Eyesight in Both Eyes&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Original Response&quot;</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;VFQ3&quot;</span>, <span class="st">&quot;VFQ3&quot;</span>, <span class="st">&quot;Worry About Eyesight&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Original Response&quot;</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;VFQ4&quot;</span>, <span class="st">&quot;VFQ4&quot;</span>, <span class="st">&quot;Pain in and Around Eyes&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Original Response&quot;</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;QR01&quot;</span>, <span class="st">&quot;QR01&quot;</span>, <span class="st">&quot;Recoded Item - 01&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;General 01&quot;</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;QR02&quot;</span>, <span class="st">&quot;QR02&quot;</span>, <span class="st">&quot;Recoded Item - 02&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;General 01&quot;</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;QR03&quot;</span>, <span class="st">&quot;QR03&quot;</span>, <span class="st">&quot;Recoded Item - 03&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;General 02&quot;</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;QR04&quot;</span>, <span class="st">&quot;QR04&quot;</span>, <span class="st">&quot;Recoded Item - 04&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;General 02&quot;</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;QSG01&quot;</span>, <span class="st">&quot;QSG01&quot;</span>, <span class="st">&quot;General Score 01&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Averaged Result&quot;</span>,</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;QSG02&quot;</span>, <span class="st">&quot;QSG02&quot;</span>, <span class="st">&quot;General Score 02&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Averaged Result&quot;</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;QBCSCORE&quot;</span>, <span class="st">&quot;QBCSCORE&quot;</span>, <span class="st">&quot;Composite Score&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Averaged Result&quot;</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>param_lookup <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="sc">~</span>QSTESTCD, <span class="sc">~</span>PARAMCD, <span class="sc">~</span>PARAM, <span class="sc">~</span>PARCAT1, <span class="sc">~</span>PARCAT2,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  <span class="st">&quot;VFQ1&quot;</span>, <span class="st">&quot;VFQ1&quot;</span>, <span class="st">&quot;Overall Health&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Original Response&quot;</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="st">&quot;VFQ2&quot;</span>, <span class="st">&quot;VFQ2&quot;</span>, <span class="st">&quot;Eyesight in Both Eyes&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Original Response&quot;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="st">&quot;VFQ3&quot;</span>, <span class="st">&quot;VFQ3&quot;</span>, <span class="st">&quot;Worry About Eyesight&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Original Response&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="st">&quot;VFQ4&quot;</span>, <span class="st">&quot;VFQ4&quot;</span>, <span class="st">&quot;Pain in and Around Eyes&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Original Response&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="st">&quot;QR01&quot;</span>, <span class="st">&quot;QR01&quot;</span>, <span class="st">&quot;Recoded Item - 01&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;General 01&quot;</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="st">&quot;QR02&quot;</span>, <span class="st">&quot;QR02&quot;</span>, <span class="st">&quot;Recoded Item - 02&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;General 01&quot;</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="st">&quot;QR03&quot;</span>, <span class="st">&quot;QR03&quot;</span>, <span class="st">&quot;Recoded Item - 03&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;General 02&quot;</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="st">&quot;QR04&quot;</span>, <span class="st">&quot;QR04&quot;</span>, <span class="st">&quot;Recoded Item - 04&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;General 02&quot;</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="st">&quot;QSG01&quot;</span>, <span class="st">&quot;QSG01&quot;</span>, <span class="st">&quot;General Score 01&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Averaged Result&quot;</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="st">&quot;QSG02&quot;</span>, <span class="st">&quot;QSG02&quot;</span>, <span class="st">&quot;General Score 02&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Averaged Result&quot;</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="st">&quot;QBCSCORE&quot;</span>, <span class="st">&quot;QBCSCORE&quot;</span>, <span class="st">&quot;Composite Score&quot;</span>, <span class="st">&quot;NEI VFQ-25&quot;</span>, <span class="st">&quot;Averaged Result&quot;</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>)</span></code></pre></div>
 <p>Now the ADVFQ dataset can be constructed, merging the filtered QS
 dataset with ADSL. This is necessary because treatment start date
 <code>TRTSDT</code> is a prerequisite for the derivation of variables
 such as Analysis Day <code>ADY</code> which can be programmed by
 following the article on <a href="https://pharmaverse.github.io/admiral/articles/bds_finding.html">creating
 a BDS dataset from SDTM</a>.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>adsl_vars <span class="ot">&lt;-</span> <span class="fu">exprs</span>(TRTSDT, TRTEDT, TRT01A, TRT01P)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> <span class="fu">derive_vars_merged</span>(</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  qs,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">dataset_add =</span> adsl,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">new_vars =</span> adsl_vars,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>adsl_vars <span class="ot">&lt;-</span> <span class="fu">exprs</span>(TRTSDT, TRTEDT, TRT01A, TRT01P)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> <span class="fu">derive_vars_merged</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  qs,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">dataset_add =</span> adsl,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">new_vars =</span> adsl_vars,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>)</span></code></pre></div>
 </div>
 <div id="aval" class="section level2">
 <h2>Derive Analysis Value for Existing Questions</h2>
@@ -432,18 +432,18 @@ a BDS dataset from SDTM</a>.</p>
 <code>PARAMCD</code> from the parameter lookup table. This merges on the
 parameter by <code>QSTESTCD</code> and assigns <code>AVAL</code> and
 <code>AVALC</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Add PARAMCD only - add PARAM etc later ----</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_vars_merged_lookup</span>(</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset_add =</span> param_lookup,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">new_vars =</span> <span class="fu">exprs</span>(PARAMCD),</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">exprs</span>(QSTESTCD)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Calculate AVAL and AVALC ----</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">AVAL =</span> QSSTRESN,</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">AVALC =</span> QSORRES</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="do">## Add PARAMCD only - add PARAM etc later ----</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="fu">derive_vars_merged_lookup</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    <span class="at">dataset_add =</span> param_lookup,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="at">new_vars =</span> <span class="fu">exprs</span>(PARAMCD),</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">exprs</span>(QSTESTCD)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="do">## Calculate AVAL and AVALC ----</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>    <span class="at">AVAL =</span> QSSTRESN,</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    <span class="at">AVALC =</span> QSORRES</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  )</span></code></pre></div>
 </div>
 <div id="parameters" class="section level2">
 <h2>Derive Parameters for Recoded Items and Summary Scores</h2>
@@ -451,55 +451,55 @@ parameter by <code>QSTESTCD</code> and assigns <code>AVAL</code> and
 should next program new records for parameters which recode the original
 questions. Run this section of code for every question that you need
 recoding. This gives an example of recoding one question.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## QR01 Recoded Item 01</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># set to 100 if [advfq.AVAL] = 1</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># else set to 75 if [advfq.AVAL] = 2</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># else set to 50 if [advfq.AVAL] = 3</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># else set to 25 if [advfq.AVAL] = 4</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># else set to 0 if [advfq.AVAL] = 5</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_summary_records</span>(</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset_add =</span> advfq,</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">c</span>(</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>),</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">exprs</span>(<span class="sc">!!!</span>adsl_vars, PARAMCD, VISITNUM, VISIT)</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">filter_add =</span> QSTESTCD <span class="sc">==</span> <span class="st">&quot;VFQ1&quot;</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(AVAL),</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">set_values_to =</span> <span class="fu">exprs</span>(</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">AVAL =</span> <span class="fu">identity</span>(AVAL),</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">PARAMCD =</span> <span class="st">&quot;QR01&quot;</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AVAL =</span> <span class="fu">ifelse</span>(PARAMCD <span class="sc">==</span> <span class="st">&quot;QR01&quot;</span>,</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">case_when</span>(</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">100</span>,</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">2</span> <span class="sc">~</span> <span class="dv">75</span>,</span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">3</span> <span class="sc">~</span> <span class="dv">50</span>,</span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">4</span> <span class="sc">~</span> <span class="dv">25</span>,</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>      AVAL <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">~</span> <span class="dv">0</span></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    AVAL</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>  ))</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="do">## QR01 Recoded Item 01</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co"># set to 100 if [advfq.AVAL] = 1</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co"># else set to 75 if [advfq.AVAL] = 2</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co"># else set to 50 if [advfq.AVAL] = 3</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co"># else set to 25 if [advfq.AVAL] = 4</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co"># else set to 0 if [advfq.AVAL] = 5</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="fu">derive_summary_records</span>(</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>    <span class="at">dataset_add =</span> advfq,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">c</span>(</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>      <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>),</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>      <span class="fu">exprs</span>(<span class="sc">!!!</span>adsl_vars, PARAMCD, VISITNUM, VISIT)</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>    ),</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>    <span class="at">filter_add =</span> QSTESTCD <span class="sc">==</span> <span class="st">&quot;VFQ1&quot;</span> <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(AVAL),</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>    <span class="at">set_values_to =</span> <span class="fu">exprs</span>(</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>      <span class="at">AVAL =</span> <span class="fu">identity</span>(AVAL),</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>      <span class="at">PARAMCD =</span> <span class="st">&quot;QR01&quot;</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>    )</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AVAL =</span> <span class="fu">ifelse</span>(PARAMCD <span class="sc">==</span> <span class="st">&quot;QR01&quot;</span>,</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>    <span class="fu">case_when</span>(</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">100</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">2</span> <span class="sc">~</span> <span class="dv">75</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">3</span> <span class="sc">~</span> <span class="dv">50</span>,</span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>      AVAL <span class="sc">==</span> <span class="dv">4</span> <span class="sc">~</span> <span class="dv">25</span>,</span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>      AVAL <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">~</span> <span class="dv">0</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>    ),</span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>    AVAL</span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>  ))</span></code></pre></div>
 <p>Next, the programmer should create summary records as average of
 recoded questions using <code>admiral::derive_summary_records</code>.
 This example uses two of the recoded questions to create an average
 record.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Derive a new record as a summary record  ----</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="do">## QSG01 General Score 01</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Average of QR01 and QR02 records</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_summary_records</span>(</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset_add =</span> advfq,</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">c</span>(</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>),</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">exprs</span>(<span class="sc">!!!</span>adsl_vars, VISITNUM, VISIT, ADT, ADY)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">filter_add =</span> PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;QR01&quot;</span>, <span class="st">&quot;QR02&quot;</span>) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(AVAL),</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">set_values_to =</span> <span class="fu">exprs</span>(</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">AVAL =</span> <span class="fu">mean</span>(AVAL),</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">PARAMCD =</span> <span class="st">&quot;QSG01&quot;</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="do">## Derive a new record as a summary record  ----</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="do">## QSG01 General Score 01</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># Average of QR01 and QR02 records</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="fu">derive_summary_records</span>(</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    <span class="at">dataset_add =</span> advfq,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">c</span>(</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>      <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>),</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>      <span class="fu">exprs</span>(<span class="sc">!!!</span>adsl_vars, VISITNUM, VISIT, ADT, ADY)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>    ),</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>    <span class="at">filter_add =</span> PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;QR01&quot;</span>, <span class="st">&quot;QR02&quot;</span>) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(AVAL),</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>    <span class="at">set_values_to =</span> <span class="fu">exprs</span>(</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>      <span class="at">AVAL =</span> <span class="fu">mean</span>(AVAL),</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>      <span class="at">PARAMCD =</span> <span class="st">&quot;QSG01&quot;</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>    )</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  )</span></code></pre></div>
 </div>
 <div id="analysis" class="section level2">
 <h2>Derive Analysis Variables</h2>
@@ -513,46 +513,46 @@ function <code>admiral::derive_var_extreme_flag()</code>. For this
 example, we will assume we would like to choose the latest value by our
 subject keys along with <code>PARAMCD</code> and
 <code>AVISIT</code>.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">## ANL01FL: Flag last result within an AVISIT for post-baseline records ----</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">restrict_derivation</span>(</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">derivation =</span> derive_var_extreme_flag,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">args =</span> <span class="fu">params</span>(</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">new_var =</span> ANL01FL,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">by_vars =</span> <span class="fu">c</span>(<span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>), <span class="fu">exprs</span>(PARAMCD, AVISIT)),</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">order =</span> <span class="fu">exprs</span>(ADT, AVAL),</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">mode =</span> <span class="st">&quot;last&quot;</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">filter =</span> <span class="sc">!</span><span class="fu">is.na</span>(AVISITN) <span class="sc">&amp;</span> ONTRTFL <span class="sc">==</span> <span class="st">&quot;Y&quot;</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="do">## ANL01FL: Flag last result within an AVISIT for post-baseline records ----</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">restrict_derivation</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    <span class="at">derivation =</span> derive_var_extreme_flag,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    <span class="at">args =</span> <span class="fu">params</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>      <span class="at">new_var =</span> ANL01FL,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>      <span class="at">by_vars =</span> <span class="fu">c</span>(<span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>), <span class="fu">exprs</span>(PARAMCD, AVISIT)),</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>      <span class="at">order =</span> <span class="fu">exprs</span>(ADT, AVAL),</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>      <span class="at">mode =</span> <span class="st">&quot;last&quot;</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>    ),</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>    <span class="at">filter =</span> <span class="sc">!</span><span class="fu">is.na</span>(AVISITN) <span class="sc">&amp;</span> ONTRTFL <span class="sc">==</span> <span class="st">&quot;Y&quot;</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  )</span></code></pre></div>
 <p>We then derive <code>ASEQ</code> using
 <code>admiral::derive_var_obs_number()</code> based on the observation
 number within the dataset, additionally merge on <code>PARAM</code>,
 <code>PARCAT1</code> and <code>PARCAT2</code> using the earlier lookup
 table.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Get ASEQ and PARAM  ----</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate ASEQ</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_var_obs_number</span>(</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">new_var =</span> ASEQ,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>),</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">order =</span> <span class="fu">exprs</span>(PARAMCD, ADT, AVISITN, VISITNUM),</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">check_type =</span> <span class="st">&quot;error&quot;</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Derive PARAM</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_vars_merged</span>(<span class="at">dataset_add =</span> <span class="fu">select</span>(param_lookup, <span class="sc">-</span>QSTESTCD), <span class="at">by_vars =</span> <span class="fu">exprs</span>(PARAMCD))</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="do">## Get ASEQ and PARAM  ----</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="co"># Calculate ASEQ</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="fu">derive_var_obs_number</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>    <span class="at">new_var =</span> ASEQ,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>    <span class="at">order =</span> <span class="fu">exprs</span>(PARAMCD, ADT, AVISITN, VISITNUM),</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>    <span class="at">check_type =</span> <span class="st">&quot;error&quot;</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  <span class="co"># Derive PARAM</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="fu">derive_vars_merged</span>(<span class="at">dataset_add =</span> <span class="fu">select</span>(param_lookup, <span class="sc">-</span>QSTESTCD), <span class="at">by_vars =</span> <span class="fu">exprs</span>(PARAMCD))</span></code></pre></div>
 </div>
 <div id="adslvars" class="section level2">
 <h2>Add ADSL Variables</h2>
 <p>Once analysis variables have been programmed, variables from ADSL
 which are required should be merged on to the dataset using
 <code>admiral::derive_vars_merged</code>.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add all ADSL variables</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_vars_merged</span>(</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset_add =</span> <span class="fu">select</span>(adsl, <span class="sc">!!!</span><span class="fu">negate_vars</span>(adsl_vars)),</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Add all ADSL variables</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>advfq <span class="ot">&lt;-</span> advfq <span class="sc">%&gt;%</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="fu">derive_vars_merged</span>(</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>    <span class="at">dataset_add =</span> <span class="fu">select</span>(adsl, <span class="sc">!!!</span><span class="fu">negate_vars</span>(adsl_vars)),</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  )</span></code></pre></div>
 </div>
 <div id="example" class="section level2">
 <h2>Example Script</h2>

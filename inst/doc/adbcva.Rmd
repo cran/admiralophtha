@@ -51,7 +51,7 @@ library(admiralophtha)
 
 ## Initial set up of ADBCVA {#setup}
 
-As with all BDS ADaM datasets, one should start from the OE SDTM, where only the BCVA records are of interest. For the purposes of the next two sections, we shall be using the `{admiral}` OE and ADSL test data. We will also require a lookup table for the mapping of parameter codes.
+As with all BDS ADaM datasets, one should start from the OE SDTM, where only the BCVA records are of interest. For the purposes of the next two sections, we shall be using the `{admiral}` OE and ADSL test data. We will also require a lookup table for the mapping of parameter codes. An SBCVA and FBCVA definition expression is created first - this expression can also be stored within another (sourced) program.
 
 **Note**: to simulate an ophthalmology study, we add a randomly generated `STUDYEYE` variable to ADSL, but in practice `STUDYEYE` will already have been derived using `derive_var_studyeye()`.
 
@@ -73,6 +73,53 @@ param_lookup <- tibble::tribble(
   ~OETESTCD, ~OECAT, ~OESCAT, ~AFEYE, ~PARAMCD, ~PARAM, ~PARAMN,
   "VACSCORE", "BEST CORRECTED VISUAL ACUITY", "OVERALL EVALUATION", "Study Eye", "SBCVA", "Study Eye Visual Acuity Score (letters)", 1, # nolint
   "VACSCORE", "BEST CORRECTED VISUAL ACUITY", "OVERALL EVALUATION", "Fellow Eye", "FBCVA", "Fellow Eye Visual Acuity Score (letters)", 2, # nolint
+)
+
+# SBCVA and FBCVA definition list
+definition_bcva <- exprs(
+  ~PARAMCD, ~condition, ~AVALCA1N, ~AVALCAT1,
+  "SBCVA", AVAL >= 0 & AVAL <= 3, 1000, "< 20/800",
+  "FBCVA", AVAL >= 0 & AVAL <= 3, 1000, "< 20/800",
+  "SBCVA", AVAL >= 4 & AVAL <= 8, 800, "20/800",
+  "FBCVA", AVAL >= 4 & AVAL <= 8, 800, "20/800",
+  "SBCVA", AVAL >= 9 & AVAL <= 13, 640, "20/640",
+  "FBCVA", AVAL >= 9 & AVAL <= 13, 640, "20/640",
+  "SBCVA", AVAL >= 14 & AVAL <= 18, 500, "20/500",
+  "FBCVA", AVAL >= 14 & AVAL <= 18, 500, "20/500",
+  "SBCVA", AVAL >= 19 & AVAL <= 23, 400, "20/400",
+  "FBCVA", AVAL >= 19 & AVAL <= 23, 400, "20/400",
+  "SBCVA", AVAL >= 24 & AVAL <= 28, 320, "20/320",
+  "FBCVA", AVAL >= 24 & AVAL <= 28, 320, "20/320",
+  "SBCVA", AVAL >= 29 & AVAL <= 33, 250, "20/250",
+  "FBCVA", AVAL >= 29 & AVAL <= 33, 250, "20/250",
+  "SBCVA", AVAL >= 34 & AVAL <= 38, 200, "20/200",
+  "FBCVA", AVAL >= 34 & AVAL <= 38, 200, "20/200",
+  "SBCVA", AVAL >= 39 & AVAL <= 43, 160, "20/160",
+  "FBCVA", AVAL >= 39 & AVAL <= 43, 160, "20/160",
+  "SBCVA", AVAL >= 44 & AVAL <= 48, 125, "20/125",
+  "FBCVA", AVAL >= 44 & AVAL <= 48, 125, "20/125",
+  "SBCVA", AVAL >= 49 & AVAL <= 53, 100, "20/100",
+  "FBCVA", AVAL >= 49 & AVAL <= 53, 100, "20/100",
+  "SBCVA", AVAL >= 54 & AVAL <= 58, 80, "20/80",
+  "FBCVA", AVAL >= 54 & AVAL <= 58, 80, "20/80",
+  "SBCVA", AVAL >= 59 & AVAL <= 63, 63, "20/63",
+  "FBCVA", AVAL >= 59 & AVAL <= 63, 63, "20/63",
+  "SBCVA", AVAL >= 64 & AVAL <= 68, 50, "20/50",
+  "FBCVA", AVAL >= 64 & AVAL <= 68, 50, "20/50",
+  "SBCVA", AVAL >= 69 & AVAL <= 73, 40, "20/40",
+  "FBCVA", AVAL >= 69 & AVAL <= 73, 40, "20/40",
+  "SBCVA", AVAL >= 74 & AVAL <= 78, 32, "20/32",
+  "FBCVA", AVAL >= 74 & AVAL <= 78, 32, "20/32",
+  "SBCVA", AVAL >= 79 & AVAL <= 83, 25, "20/25",
+  "FBCVA", AVAL >= 79 & AVAL <= 83, 25, "20/25",
+  "SBCVA", AVAL >= 84 & AVAL <= 88, 20, "20/20",
+  "FBCVA", AVAL >= 84 & AVAL <= 88, 20, "20/20",
+  "SBCVA", AVAL >= 89 & AVAL <= 93, 16, "20/16",
+  "FBCVA", AVAL >= 89 & AVAL <= 93, 16, "20/16",
+  "SBCVA", AVAL >= 94 & AVAL <= 97, 12, "20/12",
+  "FBCVA", AVAL >= 94 & AVAL <= 97, 12, "20/12",
+  "SBCVA", AVAL >= 98, 1, "> 20/12",
+  "FBCVA", AVAL >= 98, 1, "> 20/12"
 )
 ```
 
@@ -185,74 +232,13 @@ adbcva <- admiralophtha_adbcva %>%
 ```
 
 ## Deriving Analysis Value Categories for Snellen Scores {#avalcats}
-Some ophthalmology studies may desire to subdivide BCVA records according to which Snellen category they fall into (eg, 20/320, 20/100, 20/20 etc). This is best done through the use of `AVALCATx`/`AVALCAxN` variable pairs. Currently, `{admiralophtha}` does not provide specific functionality to create `AVALCATx`/`AVALCAxN` pairs, although this may be included in future releases of the package. With the current toolset, the suggested approach to derive such variables is to:
-
-* Create a lookup table which assigns numeric equivalents (i.e. `AVALCAxN`) to Snellen categories.
-* Create a format function to map each `AVAL` to a numeric category.
-* Add `AVALCAxN` through a mutate statement using the format function.
-* Add `AVALCATx` using `derive_vars_merged` in combination with the lookup table.
+Some ophthalmology studies may desire to subdivide BCVA records according to which Snellen category they fall into (eg, 20/320, 20/100, 20/20 etc). The `{admiral}` AVALCAT derivation function `derive_vars_cat` can be used to derive `AVALCA1N` and `AVALCAT1` based on `PARAMCD` and `condition` in the SBCVA and FBCVA definition expression.
 
 ```{r}
-avalcat_lookup <- tibble::tribble(
-  ~PARAMCD, ~AVALCA1N, ~AVALCAT1,
-  "SBCVA", 1000, "< 20/800",
-  "SBCVA", 800, "20/800",
-  "SBCVA", 640, "20/640",
-  "SBCVA", 500, "20/500",
-  "SBCVA", 400, "20/400",
-  "SBCVA", 320, "20/320",
-  "SBCVA", 250, "20/250",
-  "SBCVA", 200, "20/200",
-  "SBCVA", 160, "20/160",
-  "SBCVA", 125, "20/125",
-  "SBCVA", 100, "20/100",
-  "SBCVA", 80, "20/80",
-  "SBCVA", 63, "20/63",
-  "SBCVA", 50, "20/50",
-  "SBCVA", 40, "20/40",
-  "SBCVA", 32, "20/32",
-  "SBCVA", 25, "20/25",
-  "SBCVA", 20, "20/20",
-  "SBCVA", 16, "20/16",
-  "SBCVA", 12, "20/12",
-  "SBCVA", 1, "> 20/12",
-)
-
-avalcat_lookup <- avalcat_lookup %>%
-  mutate(PARAMCD = "FBCVA") %>%
-  rbind(avalcat_lookup)
-
-format_avalcat1n <- function(param, aval) {
-  case_when(
-    param %in% c("SBCVA", "FBCVA") & aval >= 0 & aval <= 3 ~ 1000,
-    param %in% c("SBCVA", "FBCVA") & aval >= 4 & aval <= 8 ~ 800,
-    param %in% c("SBCVA", "FBCVA") & aval >= 9 & aval <= 13 ~ 640,
-    param %in% c("SBCVA", "FBCVA") & aval >= 14 & aval <= 18 ~ 500,
-    param %in% c("SBCVA", "FBCVA") & aval >= 19 & aval <= 23 ~ 400,
-    param %in% c("SBCVA", "FBCVA") & aval >= 24 & aval <= 28 ~ 320,
-    param %in% c("SBCVA", "FBCVA") & aval >= 29 & aval <= 33 ~ 250,
-    param %in% c("SBCVA", "FBCVA") & aval >= 34 & aval <= 38 ~ 200,
-    param %in% c("SBCVA", "FBCVA") & aval >= 39 & aval <= 43 ~ 160,
-    param %in% c("SBCVA", "FBCVA") & aval >= 44 & aval <= 48 ~ 125,
-    param %in% c("SBCVA", "FBCVA") & aval >= 49 & aval <= 53 ~ 100,
-    param %in% c("SBCVA", "FBCVA") & aval >= 54 & aval <= 58 ~ 80,
-    param %in% c("SBCVA", "FBCVA") & aval >= 59 & aval <= 63 ~ 63,
-    param %in% c("SBCVA", "FBCVA") & aval >= 64 & aval <= 68 ~ 50,
-    param %in% c("SBCVA", "FBCVA") & aval >= 69 & aval <= 73 ~ 40,
-    param %in% c("SBCVA", "FBCVA") & aval >= 74 & aval <= 78 ~ 32,
-    param %in% c("SBCVA", "FBCVA") & aval >= 79 & aval <= 83 ~ 25,
-    param %in% c("SBCVA", "FBCVA") & aval >= 84 & aval <= 88 ~ 20,
-    param %in% c("SBCVA", "FBCVA") & aval >= 89 & aval <= 93 ~ 16,
-    param %in% c("SBCVA", "FBCVA") & aval >= 94 & aval <= 97 ~ 12,
-    param %in% c("SBCVA", "FBCVA") & aval >= 98 ~ 1
-  )
-}
-
 adbcva <- adbcva %>%
-  mutate(AVALCA1N = format_avalcat1n(param = PARAMCD, aval = AVAL)) %>%
-  derive_vars_merged(
-    avalcat_lookup,
-    by = exprs(PARAMCD, AVALCA1N)
+  derive_vars_cat(
+    definition = definition_bcva,
+    by_vars = exprs(PARAMCD)
   )
 ```
 
@@ -268,33 +254,45 @@ dataset_vignette(
 ```
 ## Deriving Criterion Flags for BCVA Change {#critflags}
 
-`{admiralophtha}` suggests the use of criterion flag variable pairs (`CRITx`/`CRITxFL`) to program BCVA endpoints such as *Avoiding a loss of x letters*  or *Gain of y letters* or *Gain of between x and y letters* (relative to baseline or other basetypes). The package provides the function `derive_var_bcvacritxfl()` to program these endpoints efficiently and consistently. In terms of the logic to apply to the variable `CHG`, the endpoints fall into three classes, which can be represented by inequalities:
+`{admiralophtha}` suggests the use of criterion flag variable pairs (`CRITx`/`CRITxFL`) to program BCVA endpoints such as *Avoiding a loss of x letters*  or *Gain of y letters* or *Gain of between x and y letters* (relative to baseline or other basetypes). The `{admiral}` function `derive_vars_crit_flag()` can be used to derive all these criterion pairs by listing the criterion number, condition such as:
 
-* Class 1: `CHG` value lying inside a range, `a <= CHG <= b`.
-* Class 2: `CHG` value below an upper limit, `CHG <= a`.
-* Class 3: `CHG` value above a lower limit, `CHG => b`.
+* `CHG` value lying inside a range, `CHG >= a & CHG <= b`
+* `CHG` value below an upper limit, `CHG <= a`
+* `CHG` value above a lower limit, `CHG => b`
 
-By using `derive_var_bcvacritxfl()`, the ADaM programmer can implement all three types of endpoint at once. This is achieved by feeding the appropriate ranges, upper limits and lower limits to the `bcva_ranges`, `bcva_uplims` and `bcva_lowlims` arguments of the function. For instance, let's suppose that the endpoints of interest are:
+and their corresponding description of the criterion. If `values_yn` is set to TRUE, the `CRITxFL` variable is assigned "Y" when the condition is true, "N" when the condition is false, and NA when the condition is NA. If not set to TRUE, `CRITxFL` is assigned "Y" when the condition is true and NA otherwise.
 
-* *Gain of between 5 and 10 letters relative to baseline* (Class 1: `5 <= CHG <= 10`)
-* *Gain of 25 letters or fewer relative to baseline* (Class 2: `CHG <= 25`)
-* *Loss of 5 letters or more relative to baseline* (Class 2: `CHG <= -5`)
-* *Gain of 15 letters or more relative to baseline* (Class 3: `CHG >= 15`)
-* *Loss of 10 letters or fewer relative to baseline* (Class 3: `CHG >= -10`).
+and their corresponding description of the criterion. If `values_yn` is set to `TRUE`, the `CRITxFL` variable is assigned `"Y"` when the condition is satisfied, `"N"` when the condition is not satisfied, and `NA` when there is not enough information to determine whether the condition is satisfied. If `values_yn` is not set to `TRUE`, `CRITxFL` is assigned `"Y"` when the condition is satisfied and `NA` otherwise.
 
-Then, the following call will implement criterion variable/flag pairs for the endpoints above. The `CRITx` variables will automatically encode the correct inequality. Note that that `restrict_derivation()` is wrapped around the call so as to only derive the variables for the relevant parameters. In this way, the `filter` argument can be altered to restrict derivation to only relevant records. Note also that the argument `crit_var = exprs(CHG)` has to be specified so that the criterion flags are derived with respect to the correct variable.
+
+For illustrative purposes, let's suppose that the endpoints of interest are:
+
+* *Gain of between 5 and 10 letters relative to baseline* (`5 <= CHG <= 10`)
+* *Gain of 25 letters or fewer relative to baseline* (`CHG <= 25`)
+* *Loss of 5 letters or more relative to baseline* (`CHG <= -5`)
+* *Gain of 15 letters or more relative to baseline* (`CHG >= 15`)
+* *Loss of 10 letters or fewer relative to baseline* (`CHG >= -10`).
+
+Then, the following call will implement criterion variable/flag pairs for the endpoints above. Note that `call_derivation()` is wrapped around the call so as to derive all the criterion variable/flag pairs in one call. The `PARAMCD` is filtered for `"SBCVA"` and `"FBCVA"` values in the input data set in order to select only the relevant records. The remaining records are then added back and sorted to form the full data set.
 
 ```{r}
-adbcva <- adbcva %>% restrict_derivation(
-  derivation = derive_var_bcvacritxfl,
-  args = params(
-    crit_var = exprs(CHG),
-    bcva_ranges = list(c(5, 10)),
-    bcva_uplims = list(25, -5),
-    bcva_lowlims = list(15, -10)
+adbcva <- call_derivation(
+  dataset = adbcva %>% filter(PARAMCD %in% c("SBCVA", "FBCVA")),
+  derivation = derive_vars_crit_flag,
+  variable_params = list(
+    params(crit_nr = 1, condition = CHG >= 5 & CHG <= 10, description = "5 <= CHG <= 10"),
+    params(crit_nr = 2, condition = CHG <= 25, description = "CHG <= 25"),
+    params(crit_nr = 3, condition = CHG <= -5, description = "CHG <= -5"),
+    params(crit_nr = 4, condition = CHG >= 15, description = "CHG >= 15"),
+    params(crit_nr = 5, condition = CHG >= -10, description = "CHG >= -10")
   ),
-  filter = PARAMCD %in% c("SBCVA", "FBCVA")
-)
+  values_yn = TRUE
+) %>%
+  bind_rows(
+    adbcva %>%
+      filter(!PARAMCD %in% c("SBCVA", "FBCVA"))
+  ) %>%
+  arrange(USUBJID, DOMAIN, PARAMCD)
 ```
 
 The resulting output is shown below (limited to the first patient only):
@@ -307,44 +305,11 @@ dataset_vignette(
 )
 ```
 
-It is also possible to assign significance to the "x" in `CRITxFL`. For instance, one could designate all criterion flags of Class 1 as `CRIT1yFL`, Class 2 as `CRIT2yFL`, and Class 3 as `CRIT3yFL`. The argument `critxfl_index` allows a simple implementation of this in conjunction with three separate calls to `derive_var_bcvacritxfl()`:
-
-```{r}
-adbcva <- adbcva %>%
-  restrict_derivation(
-    derivation = derive_var_bcvacritxfl,
-    args = params(
-      crit_var = exprs(CHG),
-      bcva_ranges = list(c(5, 10)),
-      critxfl_index = 10
-    ),
-    filter = PARAMCD %in% c("SBCVA", "FBCVA")
-  ) %>%
-  restrict_derivation(
-    derivation = derive_var_bcvacritxfl,
-    args = params(
-      crit_var = exprs(CHG),
-      bcva_uplims = list(25, -5),
-      critxfl_index = 20
-    ),
-    filter = PARAMCD %in% c("SBCVA", "FBCVA")
-  ) %>%
-  restrict_derivation(
-    derivation = derive_var_bcvacritxfl,
-    args = params(
-      crit_var = exprs(CHG),
-      bcva_lowlims = list(15, -10),
-      critxfl_index = 30
-    ),
-    filter = PARAMCD %in% c("SBCVA", "FBCVA")
-  )
-```
-  
 ## Additional Notes
   
-  * When interpreting endpoints such as *Loss of 5 letters or fewer relative to baseline*, it is implicitly assumed in this article that this also includes the case where letters are *gained*, so that the inequality reads `CHG >= -5`. One would then use the `bcva_lowlims = list(-5)` argument of `derive_var_bcvacritxfl()`  to program such an endpoint. If this is not the case, i.e. one wishes to exclude cases of letter gains, then the inequality of interest would instead be `-5 <= CHG <= -1`. Importantly, `derive_var_bcvacritxfl()` could still be used, but with the argument `bcva_ranges = list(c(-5, -1))`.
-  
-  * This vignette extensively showcases the use of `derive_var_bcvacritxfl()` applied to the variable `CHG`, but through the argument `crit_var` the function can also be used to create criterion flag relative to other variables (e.g. `crit_var = exprs(AVAL)` for `AVAL`).
+  * When interpreting endpoints such as *Loss of 5 letters or fewer relative to baseline*, it is implicitly assumed in this article that this also includes the case where letters are *gained*, so that the inequality reads `CHG >= -5`. If this is not the case, i.e. one wishes to exclude cases of letter gains, then the inequality of interest would instead be `-5 <= CHG <= -1`.
+
+  * This vignette extensively showcases the use of `derive_vars_crit_flag()` to derive criterion variable/flag pairs applied to the variable `CHG` with the associated argument `condition` for the criterion. The function can also be used to create criterion flag relative to other variables (e.g. `condition = exprs(AVAL > 10)` for `AVAL`).
   
 ## Example Script {#example}
   

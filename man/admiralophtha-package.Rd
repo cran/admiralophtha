@@ -20,7 +20,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Edoardo Mancini \email{edoardo.mancini@roche.com}
+\strong{Maintainer}: Edoardo Mancini \email{edoardo.mancini@roche.com} (\href{https://orcid.org/0009-0006-4899-8641}{ORCID})
 
 Authors:
 \itemize{
@@ -35,6 +35,7 @@ Authors:
   \item Lucy Palmen \email{lucy.palmen@roche.com}
   \item Nandini R Thampi \email{nandini.rajendhiran@novartis.com}
   \item Aldrich Salva \email{salva.aldrich@gene.com}
+  \item Steven Ting \email{steven.ting@cytel.com}
 }
 
 }

@@ -1,4 +1,25 @@
-# admiralophtha 1.1.0
+# admiralophtha 1.2.0
+
+## Updates to Templates
+
+- Replaced the function `derive_var_bcvacrtixfl()` with the new function `admiral::derive_vars_crit_flag()` for the derivation of `SBCVA` and `FBCVA` criterion flags in ADBCVA template. The function `derive_var_bcvacrtixfl()` is now superseded. (#247)
+
+- Within the ADBCVA template, updated `AVALCA1N` and `AVALCAT1` derivations to use new function `admiral::derive_vars_cat()`. (#244)
+
+## Updates to Documentation
+
+- Replaced the function `derive_var_bcvacrtixfl()` with the new function `admiral::derive_vars_crit_flag()` for the derivation of `SBCVA` and `FBCVA` criterion flags in ADBCVA vignette. The function `derive_var_bcvacrtixfl()` is now superseded. (#247)
+
+- Within the ADBCVA vignette, updated `AVALCA1N` and `AVALCAT1` derivations to use new function `admiral::derive_vars_cat()`. (#244)
+
+## Updates to Functions
+
+- The following function arguments of `derive_var_afeye()` are removed following the end of their deprecation cycle (#237):
+
+  * The argument `dataset_occ`
+  * The argument `lat_vals`
+
+# admiralophtha 1.1.0.
 
 ## Updates to Functions
 
@@ -10,7 +31,7 @@
 ## Various
 
 - All vignettes and templates in `{admiralophtha}` have been updated to use the `{admiral}` subject keys option rather than
-  explicitly quoting key variables such as `STUYDID` and `USUBJID`. For instance, a line such as `by_vars = exprs(STUDYID, USUBJID)`
+  explicitly quoting key variables such as `STUDYID` and `USUBJID`. For instance, a line such as `by_vars = exprs(STUDYID, USUBJID)`
   would be replaced by `by_vars = get_admiral_option("subject_keys")` (#226).
 
 # admiralophtha 1.0.0

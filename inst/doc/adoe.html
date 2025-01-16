@@ -49,7 +49,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -60,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -367,11 +367,11 @@ ADBCVA).</p>
 <div id="required-packages" class="section level2">
 <h2>Required Packages</h2>
 <p>The examples of this vignette require the following packages.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(admiral)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pharmaversesdtm)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(admiraldev)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(admiralophtha)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(admiral)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(pharmaversesdtm)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(admiraldev)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">library</span>(admiralophtha)</span></code></pre></div>
 </div>
 </div>
 <div id="programming-workflow" class="section level1">
@@ -393,28 +393,28 @@ lookup table for the mapping of parameter codes.</p>
 randomly generated <code>STUDYEYE</code> variable to ADSL, but in
 practice <code>STUDYEYE</code> will already have been derived using
 <code>derive_var_studyeye()</code>.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;oe_ophtha&quot;</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;admiral_adsl&quot;</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add STUDYEYE to ADSL to simulate an ophtha dataset</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>adsl <span class="ot">&lt;-</span> admiral_adsl <span class="sc">%&gt;%</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">STUDYEYE =</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">&quot;LEFT&quot;</span>, <span class="st">&quot;RIGHT&quot;</span>), <span class="fu">n</span>(), <span class="at">replace =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">convert_blanks_to_na</span>()</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>oe <span class="ot">&lt;-</span> <span class="fu">convert_blanks_to_na</span>(oe_ophtha) <span class="sc">%&gt;%</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- Lookup table ----</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign PARAMCD, PARAM, and PARAMN</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>param_lookup <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>OETESTCD, <span class="sc">~</span>OECAT, <span class="sc">~</span>OESCAT, <span class="sc">~</span>AFEYE, <span class="sc">~</span>PARAMCD, <span class="sc">~</span>PARAM, <span class="sc">~</span>PARAMN,</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;CSUBTH&quot;</span>, <span class="st">&quot;OPHTHALMIC ASSESSMENTS&quot;</span>, <span class="st">&quot;SD-OCT CST SINGLE FORM&quot;</span>, <span class="st">&quot;Study Eye&quot;</span>, <span class="st">&quot;SCSUBTH&quot;</span>, <span class="st">&quot;Study Eye Center Subfield Thickness (um)&quot;</span>, <span class="dv">1</span>, <span class="co"># nolint</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;CSUBTH&quot;</span>, <span class="st">&quot;OPHTHALMIC ASSESSMENTS&quot;</span>, <span class="st">&quot;SD-OCT CST SINGLE FORM&quot;</span>, <span class="st">&quot;Fellow Eye&quot;</span>, <span class="st">&quot;FCSUBTH&quot;</span>, <span class="st">&quot;Fellow Eye Center Subfield Thickness (um)&quot;</span>, <span class="dv">2</span>, <span class="co"># nolint</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;DRSSR&quot;</span>, <span class="st">&quot;OPHTHALMIC ASSESSMENTS&quot;</span>, <span class="st">&quot;SD-OCT CST SINGLE FORM&quot;</span>, <span class="st">&quot;Study Eye&quot;</span>, <span class="st">&quot;SDRSSR&quot;</span>, <span class="st">&quot;Study Eye Diabetic Retinopathy Severity&quot;</span>, <span class="dv">3</span>, <span class="co"># nolint</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;DRSSR&quot;</span>, <span class="st">&quot;OPHTHALMIC ASSESSMENTS&quot;</span>, <span class="st">&quot;SD-OCT CST SINGLE FORM&quot;</span>, <span class="st">&quot;Fellow Eye&quot;</span>, <span class="st">&quot;FDRSSR&quot;</span>, <span class="st">&quot;Fellow Eye Diabetic Retinopathy Severity&quot;</span>, <span class="dv">4</span>, <span class="co"># nolint</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;oe_ophtha&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;admiral_adsl&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># Add STUDYEYE to ADSL to simulate an ophtha dataset</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>adsl <span class="ot">&lt;-</span> admiral_adsl <span class="sc">%&gt;%</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">STUDYEYE =</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">&quot;LEFT&quot;</span>, <span class="st">&quot;RIGHT&quot;</span>), <span class="fu">n</span>(), <span class="at">replace =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="fu">convert_blanks_to_na</span>()</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>oe <span class="ot">&lt;-</span> <span class="fu">convert_blanks_to_na</span>(oe_ophtha) <span class="sc">%&gt;%</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># ---- Lookup table ----</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co"># Assign PARAMCD, PARAM, and PARAMN</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>param_lookup <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>  <span class="sc">~</span>OETESTCD, <span class="sc">~</span>OECAT, <span class="sc">~</span>OESCAT, <span class="sc">~</span>AFEYE, <span class="sc">~</span>PARAMCD, <span class="sc">~</span>PARAM, <span class="sc">~</span>PARAMN,</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>  <span class="st">&quot;CSUBTH&quot;</span>, <span class="st">&quot;OPHTHALMIC ASSESSMENTS&quot;</span>, <span class="st">&quot;SD-OCT CST SINGLE FORM&quot;</span>, <span class="st">&quot;Study Eye&quot;</span>, <span class="st">&quot;SCSUBTH&quot;</span>, <span class="st">&quot;Study Eye Center Subfield Thickness (um)&quot;</span>, <span class="dv">1</span>, <span class="co"># nolint</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>  <span class="st">&quot;CSUBTH&quot;</span>, <span class="st">&quot;OPHTHALMIC ASSESSMENTS&quot;</span>, <span class="st">&quot;SD-OCT CST SINGLE FORM&quot;</span>, <span class="st">&quot;Fellow Eye&quot;</span>, <span class="st">&quot;FCSUBTH&quot;</span>, <span class="st">&quot;Fellow Eye Center Subfield Thickness (um)&quot;</span>, <span class="dv">2</span>, <span class="co"># nolint</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>  <span class="st">&quot;DRSSR&quot;</span>, <span class="st">&quot;OPHTHALMIC ASSESSMENTS&quot;</span>, <span class="st">&quot;SD-OCT CST SINGLE FORM&quot;</span>, <span class="st">&quot;Study Eye&quot;</span>, <span class="st">&quot;SDRSSR&quot;</span>, <span class="st">&quot;Study Eye Diabetic Retinopathy Severity&quot;</span>, <span class="dv">3</span>, <span class="co"># nolint</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>  <span class="st">&quot;DRSSR&quot;</span>, <span class="st">&quot;OPHTHALMIC ASSESSMENTS&quot;</span>, <span class="st">&quot;SD-OCT CST SINGLE FORM&quot;</span>, <span class="st">&quot;Fellow Eye&quot;</span>, <span class="st">&quot;FDRSSR&quot;</span>, <span class="st">&quot;Fellow Eye Diabetic Retinopathy Severity&quot;</span>, <span class="dv">4</span>, <span class="co"># nolint</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>)</span></code></pre></div>
 <p>Following this setup, the programmer can start constructing ADOE. The
 first step is to subset OE to only general ophthalmology parameters.
 Then, one can merge the resulting dataset with ADSL. This is required
@@ -422,17 +422,17 @@ for two reasons: firstly, <code>STUDYEYE</code> is crucial in the
 mapping of <code>AFEYE</code> and <code>PARAMCD</code>’s. Secondly, the
 treatment start date (<code>TRTSDT</code>) is also a prerequisite for
 the derivation of variables such as Analysis Day (<code>ADY</code>).</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>adsl_vars <span class="ot">&lt;-</span> <span class="fu">exprs</span>(TRTSDT, TRTEDT, TRT01A, TRT01P, STUDYEYE)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>adoe <span class="ot">&lt;-</span> oe <span class="sc">%&gt;%</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    OETESTCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;CSUBTH&quot;</span>, <span class="st">&quot;DRSSR&quot;</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_vars_merged</span>(</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">dataset_add =</span> adsl,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">new_vars =</span> adsl_vars,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>adsl_vars <span class="ot">&lt;-</span> <span class="fu">exprs</span>(TRTSDT, TRTEDT, TRT01A, TRT01P, STUDYEYE)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>adoe <span class="ot">&lt;-</span> oe <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>    OETESTCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;CSUBTH&quot;</span>, <span class="st">&quot;DRSSR&quot;</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="fu">derive_vars_merged</span>(</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>    <span class="at">dataset_add =</span> adsl,</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    <span class="at">new_vars =</span> adsl_vars,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="at">by_vars =</span> <span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  )</span></code></pre></div>
 <p>The next item of business is to derive <code>AVAL</code>,
 <code>AVALU</code>, and <code>DTYPE</code>. In this example, due to the
 small number of parameters their derivation is trivial.
@@ -440,16 +440,16 @@ small number of parameters their derivation is trivial.
 <code>derive_var_afeye()</code>. To determine the affected eye, this
 function compares <code>OELAT</code> to the <code>STUDYEYE</code>
 variable created from the previous step.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>adoe <span class="ot">&lt;-</span> adoe <span class="sc">%&gt;%</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate AVAL, AVALC, AVALU and DTYPE</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">AVAL =</span> OESTRESN,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">AVALC =</span> OESTRESC,</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">AVALU =</span> OESTRESU,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">DTYPE =</span> <span class="cn">NA_character_</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Derive AFEYE needed for PARAMCD derivation</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">derive_var_afeye</span>(<span class="at">loc_var =</span> OELOC, <span class="at">lat_var =</span> OELAT, <span class="at">loc_vals =</span> <span class="fu">c</span>(<span class="st">&quot;EYE&quot;</span>, <span class="st">&quot;RETINA&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>adoe <span class="ot">&lt;-</span> adoe <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="co"># Calculate AVAL, AVALC, AVALU and DTYPE</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    <span class="at">AVAL =</span> OESTRESN,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="at">AVALC =</span> OESTRESC,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="at">AVALU =</span> OESTRESU,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    <span class="at">DTYPE =</span> <span class="cn">NA_character_</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="co"># Derive AFEYE needed for PARAMCD derivation</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="fu">derive_var_afeye</span>(<span class="at">loc_var =</span> OELOC, <span class="at">lat_var =</span> OELAT, <span class="at">loc_vals =</span> <span class="fu">c</span>(<span class="st">&quot;EYE&quot;</span>, <span class="st">&quot;RETINA&quot;</span>))</span></code></pre></div>
 </div>
 <div id="further" class="section level2">
 <h2>Further Derivations of Standard BDS Variables</h2>
