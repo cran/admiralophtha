@@ -25,7 +25,7 @@ adsl <- admiral_adsl %>%
 oe <- convert_blanks_to_na(oe_ophtha) %>%
   ungroup()
 
-# ---- Lookup table ----
+# Lookup table
 param_lookup <- tibble::tribble(
   ~OETESTCD, ~OECAT, ~OESCAT, ~AFEYE, ~PARAMCD, ~PARAM, ~PARAMN,
   "VACSCORE", "BEST CORRECTED VISUAL ACUITY", "OVERALL EVALUATION", "Study Eye", "SBCVA", "Study Eye Visual Acuity Score (letters)", 1, # nolint
@@ -179,21 +179,24 @@ dataset_vignette(
 )
 
 ## -----------------------------------------------------------------------------
-adbcva <- call_derivation(
-  dataset = adbcva %>% filter(PARAMCD %in% c("SBCVA", "FBCVA")),
-  derivation = derive_vars_crit_flag,
-  variable_params = list(
-    params(crit_nr = 1, condition = CHG >= 5 & CHG <= 10, description = "5 <= CHG <= 10"),
-    params(crit_nr = 2, condition = CHG <= 25, description = "CHG <= 25"),
-    params(crit_nr = 3, condition = CHG <= -5, description = "CHG <= -5"),
-    params(crit_nr = 4, condition = CHG >= 15, description = "CHG >= 15"),
-    params(crit_nr = 5, condition = CHG >= -10, description = "CHG >= -10")
-  ),
-  values_yn = TRUE
-) %>%
-  bind_rows(
-    adbcva %>%
-      filter(!PARAMCD %in% c("SBCVA", "FBCVA"))
+adbcva <- adbcva %>%
+  restrict_derivation(
+    derivation = call_derivation,
+    filter = PARAMCD %in% c("SBCVA", "FBCVA"),
+    args = params(
+      derivation = derive_vars_crit_flag,
+      variable_params = list(
+        params(crit_nr = 1, condition = CHG >= 0 & CHG <= 5, description = "0 <= CHG <= 5"),
+        params(crit_nr = 2, condition = CHG >= -5 & CHG <= -1, description = "-5 <= CHG <= -1"),
+        params(crit_nr = 3, condition = CHG >= 10 & CHG <= 15, description = "10 <= CHG <= 15"),
+        params(crit_nr = 4, condition = CHG <= -20, description = "CHG <= -20"),
+        params(crit_nr = 5, condition = CHG <= 5, description = "CHG <= 5"),
+        params(crit_nr = 6, condition = CHG <= 10, description = "CHG <= 10"),
+        params(crit_nr = 7, condition = CHG >= -15, description = "CHG >= -15"),
+        params(crit_nr = 8, condition = CHG >= 15, description = "CHG >= 15")
+      ),
+      values_yn = TRUE
+    )
   ) %>%
   arrange(USUBJID, DOMAIN, PARAMCD)
 

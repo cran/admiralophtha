@@ -404,7 +404,7 @@ practice <code>STUDYEYE</code> will already have been derived using
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>oe <span class="ot">&lt;-</span> <span class="fu">convert_blanks_to_na</span>(oe_ophtha) <span class="sc">%&gt;%</span></span>
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># ---- Lookup table ----</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># Lookup table</span></span>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>param_lookup <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tribble</span>(</span>
 <span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>  <span class="sc">~</span>OETESTCD, <span class="sc">~</span>OECAT, <span class="sc">~</span>OESCAT, <span class="sc">~</span>AFEYE, <span class="sc">~</span>PARAMCD, <span class="sc">~</span>PARAM, <span class="sc">~</span>PARAMN,</span>
 <span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>  <span class="st">&quot;VACSCORE&quot;</span>, <span class="st">&quot;BEST CORRECTED VISUAL ACUITY&quot;</span>, <span class="st">&quot;OVERALL EVALUATION&quot;</span>, <span class="st">&quot;Study Eye&quot;</span>, <span class="st">&quot;SBCVA&quot;</span>, <span class="st">&quot;Study Eye Visual Acuity Score (letters)&quot;</span>, <span class="dv">1</span>, <span class="co"># nolint</span></span>
@@ -582,9 +582,10 @@ purposes these are removed.</p>
 <p>Some ophthalmology studies may desire to subdivide BCVA records
 according to which Snellen category they fall into (eg, 20/320, 20/100,
 20/20 etc). The <code>{admiral}</code> AVALCAT derivation function
-<code>derive_vars_cat</code> can be used to derive <code>AVALCA1N</code>
-and <code>AVALCAT1</code> based on <code>PARAMCD</code> and
-<code>condition</code> in the SBCVA and FBCVA definition expression.</p>
+<code>derive_vars_cat()</code> can be used to derive
+<code>AVALCA1N</code> and <code>AVALCAT1</code> based on
+<code>PARAMCD</code> and <code>condition</code> in the SBCVA and FBCVA
+definition expression.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>adbcva <span class="ot">&lt;-</span> adbcva <span class="sc">%&gt;%</span></span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="fu">derive_vars_cat</span>(</span>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>    <span class="at">definition =</span> definition_bcva,</span>
@@ -723,47 +724,57 @@ interest are:</p>
 (<code>CHG &gt;= -10</code>).</li>
 </ul>
 <p>Then, the following call will implement criterion variable/flag pairs
-for the endpoints above. Note that <code>call_derivation()</code> is
-wrapped around the call so as to derive all the criterion variable/flag
-pairs in one call. The <code>PARAMCD</code> is filtered for
-<code>&quot;SBCVA&quot;</code> and <code>&quot;FBCVA&quot;</code> values in the input data
-set in order to select only the relevant records. The remaining records
-are then added back and sorted to form the full data set.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>adbcva <span class="ot">&lt;-</span> <span class="fu">call_derivation</span>(</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="at">dataset =</span> adbcva <span class="sc">%&gt;%</span> <span class="fu">filter</span>(PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;SBCVA&quot;</span>, <span class="st">&quot;FBCVA&quot;</span>)),</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="at">derivation =</span> derive_vars_crit_flag,</span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">variable_params =</span> <span class="fu">list</span>(</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>    <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">1</span>, <span class="at">condition =</span> CHG <span class="sc">&gt;=</span> <span class="dv">5</span> <span class="sc">&amp;</span> CHG <span class="sc">&lt;=</span> <span class="dv">10</span>, <span class="at">description =</span> <span class="st">&quot;5 &lt;= CHG &lt;= 10&quot;</span>),</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>    <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">2</span>, <span class="at">condition =</span> CHG <span class="sc">&lt;=</span> <span class="dv">25</span>, <span class="at">description =</span> <span class="st">&quot;CHG &lt;= 25&quot;</span>),</span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>    <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">3</span>, <span class="at">condition =</span> CHG <span class="sc">&lt;=</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">description =</span> <span class="st">&quot;CHG &lt;= -5&quot;</span>),</span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>    <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">4</span>, <span class="at">condition =</span> CHG <span class="sc">&gt;=</span> <span class="dv">15</span>, <span class="at">description =</span> <span class="st">&quot;CHG &gt;= 15&quot;</span>),</span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>    <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">5</span>, <span class="at">condition =</span> CHG <span class="sc">&gt;=</span> <span class="sc">-</span><span class="dv">10</span>, <span class="at">description =</span> <span class="st">&quot;CHG &gt;= -10&quot;</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>  ),</span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>  <span class="at">values_yn =</span> <span class="cn">TRUE</span></span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>  <span class="fu">bind_rows</span>(</span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>    adbcva <span class="sc">%&gt;%</span></span>
-<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>      <span class="fu">filter</span>(<span class="sc">!</span>PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;SBCVA&quot;</span>, <span class="st">&quot;FBCVA&quot;</span>))</span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>  <span class="fu">arrange</span>(USUBJID, DOMAIN, PARAMCD)</span></code></pre></div>
+for the endpoints above. The base function we are using is
+<code>derive_vars_crit_flag()</code>. We wrap this function inside of
+<code>call_derivation()</code> so as to derive all the criterion
+variable/flag pairs in one call. Additionally, we also wrap everything
+inside of <code>restrict_derivation()</code> to ensure the criterion
+flags are only derived for the right <code>PARAMCD</code> values
+(<code>&quot;SBCVA&quot;</code> and <code>&quot;FBCVA&quot;</code>).</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>adbcva <span class="ot">&lt;-</span> adbcva <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="fu">restrict_derivation</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>    <span class="at">derivation =</span> call_derivation,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>    <span class="at">filter =</span> PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;SBCVA&quot;</span>, <span class="st">&quot;FBCVA&quot;</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>    <span class="at">args =</span> <span class="fu">params</span>(</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>      <span class="at">derivation =</span> derive_vars_crit_flag,</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>      <span class="at">variable_params =</span> <span class="fu">list</span>(</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>        <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">1</span>, <span class="at">condition =</span> CHG <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">&amp;</span> CHG <span class="sc">&lt;=</span> <span class="dv">5</span>, <span class="at">description =</span> <span class="st">&quot;0 &lt;= CHG &lt;= 5&quot;</span>),</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>        <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">2</span>, <span class="at">condition =</span> CHG <span class="sc">&gt;=</span> <span class="sc">-</span><span class="dv">5</span> <span class="sc">&amp;</span> CHG <span class="sc">&lt;=</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">description =</span> <span class="st">&quot;-5 &lt;= CHG &lt;= -1&quot;</span>),</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>        <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">3</span>, <span class="at">condition =</span> CHG <span class="sc">&gt;=</span> <span class="dv">10</span> <span class="sc">&amp;</span> CHG <span class="sc">&lt;=</span> <span class="dv">15</span>, <span class="at">description =</span> <span class="st">&quot;10 &lt;= CHG &lt;= 15&quot;</span>),</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>        <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">4</span>, <span class="at">condition =</span> CHG <span class="sc">&lt;=</span> <span class="sc">-</span><span class="dv">20</span>, <span class="at">description =</span> <span class="st">&quot;CHG &lt;= -20&quot;</span>),</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>        <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">5</span>, <span class="at">condition =</span> CHG <span class="sc">&lt;=</span> <span class="dv">5</span>, <span class="at">description =</span> <span class="st">&quot;CHG &lt;= 5&quot;</span>),</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>        <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">6</span>, <span class="at">condition =</span> CHG <span class="sc">&lt;=</span> <span class="dv">10</span>, <span class="at">description =</span> <span class="st">&quot;CHG &lt;= 10&quot;</span>),</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>        <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">7</span>, <span class="at">condition =</span> CHG <span class="sc">&gt;=</span> <span class="sc">-</span><span class="dv">15</span>, <span class="at">description =</span> <span class="st">&quot;CHG &gt;= -15&quot;</span>),</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>        <span class="fu">params</span>(<span class="at">crit_nr =</span> <span class="dv">8</span>, <span class="at">condition =</span> CHG <span class="sc">&gt;=</span> <span class="dv">15</span>, <span class="at">description =</span> <span class="st">&quot;CHG &gt;= 15&quot;</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>      ),</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>      <span class="at">values_yn =</span> <span class="cn">TRUE</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>    )</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>  <span class="fu">arrange</span>(USUBJID, DOMAIN, PARAMCD)</span></code></pre></div>
 <p>The resulting output is shown below (limited to the first patient
 only):</p>
-<table style="width:100%;">
+<table>
 <colgroup>
-<col width="9%" />
 <col width="6%" />
 <col width="4%" />
-<col width="3%" />
-<col width="6%" />
-<col width="12%" />
-<col width="6%" />
+<col width="2%" />
+<col width="2%" />
+<col width="4%" />
+<col width="7%" />
+<col width="4%" />
 <col width="8%" />
-<col width="6%" />
+<col width="4%" />
 <col width="8%" />
-<col width="6%" />
-<col width="8%" />
-<col width="6%" />
-<col width="8%" />
+<col width="4%" />
+<col width="5%" />
+<col width="4%" />
+<col width="4%" />
+<col width="4%" />
+<col width="5%" />
+<col width="4%" />
+<col width="5%" />
+<col width="4%" />
+<col width="5%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -781,6 +792,12 @@ only):</p>
 <th align="left">CRIT4</th>
 <th align="left">CRIT5FL</th>
 <th align="left">CRIT5</th>
+<th align="left">CRIT6FL</th>
+<th align="left">CRIT6</th>
+<th align="left">CRIT7FL</th>
+<th align="left">CRIT7</th>
+<th align="left">CRIT8FL</th>
+<th align="left">CRIT8</th>
 </tr>
 </thead>
 <tbody>
@@ -790,47 +807,65 @@ only):</p>
 <td align="right">82</td>
 <td align="right">5</td>
 <td align="left">Y</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">Y</td>
-<td align="left">CHG &lt;= 25</td>
+<td align="left">0 &lt;= CHG &lt;= 5</td>
 <td align="left">N</td>
-<td align="left">CHG &lt;= -5</td>
+<td align="left">-5 &lt;= CHG &lt;= -1</td>
+<td align="left">N</td>
+<td align="left">10 &lt;= CHG &lt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= -20</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= 5</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= 10</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= -15</td>
 <td align="left">N</td>
 <td align="left">CHG &gt;= 15</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= -10</td>
 </tr>
 <tr class="even">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
 <td align="right">77</td>
 <td align="right">0</td>
-<td align="left">N</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= 25</td>
+<td align="left">0 &lt;= CHG &lt;= 5</td>
 <td align="left">N</td>
-<td align="left">CHG &lt;= -5</td>
+<td align="left">-5 &lt;= CHG &lt;= -1</td>
+<td align="left">N</td>
+<td align="left">10 &lt;= CHG &lt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= -20</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= 5</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= 10</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= -15</td>
 <td align="left">N</td>
 <td align="left">CHG &gt;= 15</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= -10</td>
 </tr>
 <tr class="odd">
 <td align="left">01-701-1015</td>
 <td align="left">FBCVA</td>
 <td align="right">77</td>
 <td align="right">0</td>
-<td align="left">N</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= 25</td>
+<td align="left">0 &lt;= CHG &lt;= 5</td>
 <td align="left">N</td>
-<td align="left">CHG &lt;= -5</td>
+<td align="left">-5 &lt;= CHG &lt;= -1</td>
+<td align="left">N</td>
+<td align="left">10 &lt;= CHG &lt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= -20</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= 5</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= 10</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= -15</td>
 <td align="left">N</td>
 <td align="left">CHG &gt;= 15</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= -10</td>
 </tr>
 <tr class="even">
 <td align="left">01-701-1015</td>
@@ -838,15 +873,21 @@ only):</p>
 <td align="right">64</td>
 <td align="right">-13</td>
 <td align="left">N</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">0 &lt;= CHG &lt;= 5</td>
+<td align="left">N</td>
+<td align="left">-5 &lt;= CHG &lt;= -1</td>
+<td align="left">N</td>
+<td align="left">10 &lt;= CHG &lt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= -20</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= 25</td>
+<td align="left">CHG &lt;= 5</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= -5</td>
+<td align="left">CHG &lt;= 10</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= -15</td>
 <td align="left">N</td>
 <td align="left">CHG &gt;= 15</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= -10</td>
 </tr>
 <tr class="odd">
 <td align="left">01-701-1015</td>
@@ -854,15 +895,21 @@ only):</p>
 <td align="right">92</td>
 <td align="right">15</td>
 <td align="left">N</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
-<td align="left">Y</td>
-<td align="left">CHG &lt;= 25</td>
+<td align="left">0 &lt;= CHG &lt;= 5</td>
 <td align="left">N</td>
-<td align="left">CHG &lt;= -5</td>
+<td align="left">-5 &lt;= CHG &lt;= -1</td>
+<td align="left">Y</td>
+<td align="left">10 &lt;= CHG &lt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= -20</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 5</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 10</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= -15</td>
 <td align="left">Y</td>
 <td align="left">CHG &gt;= 15</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= -10</td>
 </tr>
 <tr class="even">
 <td align="left">01-701-1015</td>
@@ -870,15 +917,21 @@ only):</p>
 <td align="right">41</td>
 <td align="right">-36</td>
 <td align="left">N</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">0 &lt;= CHG &lt;= 5</td>
+<td align="left">N</td>
+<td align="left">-5 &lt;= CHG &lt;= -1</td>
+<td align="left">N</td>
+<td align="left">10 &lt;= CHG &lt;= 15</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= 25</td>
+<td align="left">CHG &lt;= -20</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= -5</td>
+<td align="left">CHG &lt;= 5</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -15</td>
 <td align="left">N</td>
 <td align="left">CHG &gt;= 15</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= -10</td>
 </tr>
 <tr class="odd">
 <td align="left">01-701-1015</td>
@@ -886,15 +939,21 @@ only):</p>
 <td align="right">52</td>
 <td align="right">-25</td>
 <td align="left">N</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">0 &lt;= CHG &lt;= 5</td>
+<td align="left">N</td>
+<td align="left">-5 &lt;= CHG &lt;= -1</td>
+<td align="left">N</td>
+<td align="left">10 &lt;= CHG &lt;= 15</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= 25</td>
+<td align="left">CHG &lt;= -20</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= -5</td>
+<td align="left">CHG &lt;= 5</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -15</td>
 <td align="left">N</td>
 <td align="left">CHG &gt;= 15</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= -10</td>
 </tr>
 <tr class="even">
 <td align="left">01-701-1015</td>
@@ -902,15 +961,21 @@ only):</p>
 <td align="right">2</td>
 <td align="right">-75</td>
 <td align="left">N</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">0 &lt;= CHG &lt;= 5</td>
+<td align="left">N</td>
+<td align="left">-5 &lt;= CHG &lt;= -1</td>
+<td align="left">N</td>
+<td align="left">10 &lt;= CHG &lt;= 15</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= 25</td>
+<td align="left">CHG &lt;= -20</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= -5</td>
+<td align="left">CHG &lt;= 5</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -15</td>
 <td align="left">N</td>
 <td align="left">CHG &gt;= 15</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= -10</td>
 </tr>
 <tr class="odd">
 <td align="left">01-701-1015</td>
@@ -918,15 +983,21 @@ only):</p>
 <td align="right">44</td>
 <td align="right">-33</td>
 <td align="left">N</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">0 &lt;= CHG &lt;= 5</td>
+<td align="left">N</td>
+<td align="left">-5 &lt;= CHG &lt;= -1</td>
+<td align="left">N</td>
+<td align="left">10 &lt;= CHG &lt;= 15</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= 25</td>
+<td align="left">CHG &lt;= -20</td>
 <td align="left">Y</td>
-<td align="left">CHG &lt;= -5</td>
+<td align="left">CHG &lt;= 5</td>
+<td align="left">Y</td>
+<td align="left">CHG &lt;= 10</td>
+<td align="left">N</td>
+<td align="left">CHG &gt;= -15</td>
 <td align="left">N</td>
 <td align="left">CHG &gt;= 15</td>
-<td align="left">N</td>
-<td align="left">CHG &gt;= -10</td>
 </tr>
 <tr class="even">
 <td align="left">01-701-1015</td>
@@ -934,15 +1005,21 @@ only):</p>
 <td align="right">97</td>
 <td align="right">62</td>
 <td align="left">N</td>
-<td align="left">5 &lt;= CHG &lt;= 10</td>
+<td align="left">0 &lt;= CHG &lt;= 5</td>
 <td align="left">N</td>
-<td align="left">CHG &lt;= 25</td>
+<td align="left">-5 &lt;= CHG &lt;= -1</td>
 <td align="left">N</td>
-<td align="left">CHG &lt;= -5</td>
+<td align="left">10 &lt;= CHG &lt;= 15</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= -20</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 5</td>
+<td align="left">N</td>
+<td align="left">CHG &lt;= 10</td>
+<td align="left">Y</td>
+<td align="left">CHG &gt;= -15</td>
 <td align="left">Y</td>
 <td align="left">CHG &gt;= 15</td>
-<td align="left">Y</td>
-<td align="left">CHG &gt;= -10</td>
 </tr>
 </tbody>
 </table>
