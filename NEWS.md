@@ -1,3 +1,46 @@
+# admiralophtha 1.4.0
+
+## Breaking Changes
+
+- The following functions are entering the next phase of the [deprecation process](https://pharmaverse.github.io/admiraldev/articles/programming_strategy.html#deprecation): 
+
+  **Phase 1 (message)**
+    
+  - `derive_var_bcvacritxfl()` and its internal utility function `derive_var_bcvacritxfl_util()`. Users are invited to use
+  `admiral::derive_vars_crit_flag()` - please see the [criterion flag section of the ADBCVA vignette](https://pharmaverse.github.io/admiralophtha/articles/adbcva.html#critflags) 
+  for more details. Each deprecation phase for this function will only last six months (i.e. one release cycle). (#282)
+  
+  **Phase 2 (warning)**
+
+  **Phase 3 (error)**
+
+  **Phase 4 (removed)**
+
+## Updates to Templates
+
+- The `ADVFQ` template was reviewed and modernized to be more in line with VFQ guidance. (#261)
+
+## Updates to Documentation
+
+- The "Ask AI" widget was added to the bottom right of each page. It enables users to ask questions about `{admiralophtha}` and the
+rest of the `{admiral}` ecosystem and receive answers from an LLM. It is trained on the documentation of all `{admiral}` packages
+and provided by [kapa.ai](https://docs.kapa.ai/kapa-for-open-source). (#2887)
+
+- The `ADVFQ` vignette was reviewed and modernized to be more in line with VFQ guidance. (#261)
+
+- Started using custom `{admiral}` roclet, resulting in cleared "Permitted" and "Default" values in function documentation. (#277)
+
+- Removed erroneous deprecation badges for `dataset` and `loc_vals` arguments of `derive_var_afeye()`. (#278)
+
+## Various
+
+<details>
+<summary>Developer Notes</summary>
+
+* Updated `{lintr}` configurations to use central configurations from `{admiraldev}`. (#280)
+
+</details>
+
 # admiralophtha 1.3.0
 
 ## Updates to Templates
@@ -10,7 +53,7 @@
  
 - Updated ADOE template to showcase the mapping of IOP parameters, as well as the derivation of parameters for the difference between pre and post-dose IOP. (#260)
 
-- Added a citation for the source of the Visual Functioning Questionnaire (VFQ) to the ADVFQ template, vignette and test dataset documentation.
+- Added a citation for the source of the Visual Functioning Questionnaire (VFQ) to the ADVFQ template, vignette and test dataset documentation. (#243)
 
 ## Various
 
@@ -23,7 +66,6 @@
 - Replaced the function `derive_var_bcvacrtixfl()` with the new function `admiral::derive_vars_crit_flag()` for the derivation of `SBCVA` and `FBCVA` criterion flags in ADBCVA template. The function `derive_var_bcvacrtixfl()` is now superseded. (#247)
 
 - Within the ADBCVA template, updated `AVALCA1N` and `AVALCAT1` derivations to use new function `admiral::derive_vars_cat()`. (#244)
-
 ## Updates to Documentation
 
 - Replaced the function `derive_var_bcvacrtixfl()` with the new function `admiral::derive_vars_crit_flag()` for the derivation of `SBCVA` and `FBCVA` criterion flags in ADBCVA vignette. The function `derive_var_bcvacrtixfl()` is now superseded. (#247)

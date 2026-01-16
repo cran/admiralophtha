@@ -16,6 +16,8 @@ CDISC
 ETDRS
 FBCVA
 FOCID
+Hoffmann
+LLM
 Laterality
 LogMAR
 ORCID
@@ -25,10 +27,12 @@ SBCVA
 SDTM
 Snellen
 Thampi
+Tidyverse
 VFQ
 adbcva
 adoe
 advfq
+ai
 al
 basetypes
 categorisation
@@ -36,8 +40,10 @@ crtflag
 doi
 eg
 et
+funder
 https
 intraocular
+kapa
 laterality
 logMAR
 masse
@@ -48,7 +54,11 @@ recoded
 recoding
 scrutinise
 th
+tidyverse
 toolset
 IOP
 pre
 timepoint
+evaluable
+roclet
+tibble

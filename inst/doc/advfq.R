@@ -10,136 +10,475 @@ library(admiral)
 library(pharmaversesdtm)
 library(admiraldev)
 library(admiralophtha)
+library(stringr)
 
 ## -----------------------------------------------------------------------------
 data("admiral_adsl")
 data("qs_ophtha")
+
 adsl <- admiral_adsl
 qs <- qs_ophtha
 
-qs <- qs %>% filter(QSTESTCD %in% c("VFQ1", "VFQ2", "VFQ3", "VFQ4"))
+## ----eval=TRUE, echo=FALSE----------------------------------------------------
+## Original parameters (note PARAM, PARAMCD are identical to QSTEST, QSTESTCD) ----
+param_lookup_original <- tribble(
+  ~QSTESTCD,  ~PARAM,                                ~PARCAT3,                ~PARCAT4,                              ~PARCAT5,
+  "VFQ101",   "Your Overall Health Is",              "general health",        "General Health",                      "Base Item",
+  "VFQ102",   "Eyesight Using Both Eyes Is",         "general vision",        "General Vision",                      "Base Item",
+  "VFQ103",   "How Often You Worry About Eyesight",  "well-being/distress",   "Vision Specific: Mental Health",      "Base Item",
+  "VFQ104",   "How Much Pain in and Around Eyes",    "ocular pain",           "Ocular Pain",                         "Base Item",
+  "VFQ105",   "Difficulty Reading Newspapers",       "near vision",           "Near Activities",                     "Base Item",
+  "VFQ106",   "Difficulty Doing Work/Hobbies",       "near vision",           "Near Activities",                     "Base Item",
+  "VFQ107",   "Difficulty Finding on Crowded Shelf", "near vision",           "Near Activities",                     "Base Item",
+  "VFQ108",   "Difficulty Reading Street Signs",     "distance vision",       "Distance Activities",                 "Base Item",
+  "VFQ109",   "Difficulty Going Down Step at Night", "distance vision",       "Distance Activities",                 "Base Item",
+  "VFQ110",   "Difficulty Noticing Objects to Side", "peripheral vision",     "Peripheral Vision",                   "Base Item",
+  "VFQ111",   "Difficulty Seeing How People React",  "social fx",             "Vision Specific: Social Functioning", "Base Item",
+  "VFQ112",   "Difficulty Picking Out Own Clothes",  "color vision",          "Color Vision",                        "Base Item",
+  "VFQ113",   "Difficulty Visiting With People",     "social fx",             "Vision Specific: Social Functioning", "Base Item",
+  "VFQ114",   "Difficulty Going Out to See Movies",  "distance vision",       "Distance Activities",                 "Base Item",
+  "VFQ115",   "Are You Currently Driving",           "driving (filter item)", NA_character_,                         "Base Item",
+  "VFQ115A",  "Never Driven or Given Up Driving",    "driving (filter item)", NA_character_,                         "Base Item",
+  "VFQ115B",  "Main Reason You Gave Up Driving",     "driving (filter item)", NA_character_,                         "Base Item",
+  "VFQ115C",  "Difficulty Driving During Daytime",   "driving",               "Driving",                             "Base Item",
+  "VFQ116",   "Difficulty Driving at Night",         "driving",               "Driving",                             "Base Item",
+  "VFQ116A",  "Driving in Difficult Conditions",     "driving",               "Driving",                             "Base Item",
+  "VFQ117",   "Accomplish Less Than You Would Like", "role limitations",      "Vision Specific: Role Difficulties",  "Base Item",
+  "VFQ118",   "Limited in How Long You Can Work",    "role limitations",      "Vision Specific: Role Difficulties",  "Base Item",
+  "VFQ119",   "Eye Pain Keep From Doing What Like",  "ocular pain",           "Ocular Pain",                         "Base Item",
+  "VFQ120",   "I Stay Home Most of the Time",        "dependency",            "Vision Specific: Dependency",         "Base Item",
+  "VFQ121",   "I Feel Frustrated a Lot of the Time", "well-being/distress",   "Vision Specific: Mental Health",      "Base Item",
+  "VFQ122",   "Much Less Control Over What I Do",    "well-being/distress",   "Vision Specific: Mental Health",      "Base Item",
+  "VFQ123",   "Rely Too Much on What Others Tell",   "dependency",            "Vision Specific: Dependency",         "Base Item",
+  "VFQ124",   "I Need a Lot of Help From Others",    "dependency",            "Vision Specific: Dependency",         "Base Item",
+  "VFQ125",   "Worry I'll Do Embarrassing Things",   "well-being/distress",   "Vision Specific: Mental Health",      "Base Item",
+  "VFQ1A01",  "Rate Your Overall Health",            "general health",        "General Health",                      "Optional Item",
+  "VFQ1A02",  "Rate Your Eyesight Now",              "general vision",        "General Vision",                      "Optional Item",
+  "VFQ1A03",  "Difficulty Reading Small Print",      "near vision",           "Near Activities",                     "Optional Item",
+  "VFQ1A04",  "Difficulty Figure Out Bill Accuracy", "near vision",           "Near Activities",                     "Optional Item",
+  "VFQ1A05",  "Difficulty Shaving or Styling Hair",  "near vision",           "Near Activities",                     "Optional Item",
+  "VFQ1A06",  "Difficulty Recognizing People",       "distance vision",       "Distance Activities",                 "Optional Item",
+  "VFQ1A07",  "Difficulty Taking Part in Sports",    "distance vision",       "Distance Activities",                 "Optional Item",
+  "VFQ1A08",  "Difficulty Seeing Programs on TV",    "distance vision",       "Distance Activities",                 "Optional Item",
+  "VFQ1A09",  "Difficulty Entertaining Friends",     "social fx",             "Vision Specific: Social Functioning", "Optional Item",
+  "VFQ1A11A", "Do You Have More Help From Others",   "role limitations",      "Vision Specific: Role Difficulties",  "Optional Item",
+  "VFQ1A11B", "Limited in Kinds of Things Can Do",   "role limitations",      "Vision Specific: Role Difficulties",  "Optional Item",
+  "VFQ1A12",  "Often Irritable Because Eyesight",    "well-being/distress",   "Vision Specific: Mental Health",      "Optional Item",
+  "VFQ1A13",  "I Don't Go Out of My Home Alone",     "dependency",            "Vision Specific: Dependency",         "Optional Item"
+) %>%
+  mutate(
+    PARAMCD = QSTESTCD,
+    PARCAT1 = "VFQ-25 INTERVIEWER ADMINISTERED",
+    PARCAT2 = "Original Items"
+  ) %>%
+  select(QSTESTCD, PARAM, PARAMCD, PARCAT1, PARCAT2, PARCAT3, PARCAT4, PARCAT5)
 
-## ----eval=FALSE---------------------------------------------------------------
-#  param_lookup <- tibble::tribble(
-#    ~QSTESTCD, ~PARAMCD, ~PARAM, ~PARCAT1, ~PARCAT2,
-#    "VFQ1", "VFQ1", "Overall Health", "NEI VFQ-25", "Original Response",
-#    "VFQ2", "VFQ2", "Eyesight in Both Eyes", "NEI VFQ-25", "Original Response",
-#    "VFQ3", "VFQ3", "Worry About Eyesight", "NEI VFQ-25", "Original Response",
-#    "VFQ4", "VFQ4", "Pain in and Around Eyes", "NEI VFQ-25", "Original Response",
-#    "QR01", "QR01", "Recoded Item - 01", "NEI VFQ-25", "General 01",
-#    "QR02", "QR02", "Recoded Item - 02", "NEI VFQ-25", "General 01",
-#    "QR03", "QR03", "Recoded Item - 03", "NEI VFQ-25", "General 02",
-#    "QR04", "QR04", "Recoded Item - 04", "NEI VFQ-25", "General 02",
-#    "QSG01", "QSG01", "General Score 01", "NEI VFQ-25", "Averaged Result",
-#    "QSG02", "QSG02", "General Score 02", "NEI VFQ-25", "Averaged Result",
-#    "QBCSCORE", "QBCSCORE", "Composite Score", "NEI VFQ-25", "Averaged Result"
+## Transformed parameters ----
+param_lookup_transformed <- tribble(
+  ~PARAMCD,  ~PARAM,                                              ~PARCAT3,              ~PARCAT4,                              ~PARCAT5,
+  "QR01",    "Transformed - Your Overall Health Is",              "general health",      "General Health",                      "Base Item",
+  "QR02",    "Transformed - Eyesight Using Both Eyes Is",         "general vision",      "General Vision",                      "Base Item",
+  "QR03",    "Transformed - How Often You Worry About Eyesight",  "well-being/distress", "Vision Specific: Mental Health",      "Base Item",
+  "QR04",    "Transformed - How Much Pain in and Around Eyes",    "ocular pain",         "Ocular Pain",                         "Base Item",
+  "QR05",    "Transformed - Difficulty Reading Newspapers",       "near vision",         "Near Activities",                     "Base Item",
+  "QR06",    "Transformed - Difficulty Doing Work/Hobbies",       "near vision",         "Near Activities",                     "Base Item",
+  "QR07",    "Transformed - Difficulty Finding on Crowded Shelf", "near vision",         "Near Activities",                     "Base Item",
+  "QR08",    "Transformed - Difficulty Reading Street Signs",     "distance vision",     "Distance Activities",                 "Base Item",
+  "QR09",    "Transformed - Difficulty Going Down Step at Night", "distance vision",     "Distance Activities",                 "Base Item",
+  "QR10",    "Transformed - Difficulty Noticing Objects to Side", "peripheral vision",   "Peripheral Vision",                   "Base Item",
+  "QR11",    "Transformed - Difficulty Seeing How People React",  "social fx",           "Vision Specific: Social Functioning", "Base Item",
+  "QR12",    "Transformed - Difficulty Picking Out Own Clothes",  "color vision",        "Color Vision",                        "Base Item",
+  "QR13",    "Transformed - Difficulty Visiting With People",     "social fx",           "Vision Specific: Social Functioning", "Base Item",
+  "QR14",    "Transformed - Difficulty Going Out to See Movies",  "distance vision",     "Distance Activities",                 "Base Item",
+  "QR15C",   "Transformed - Main Reason You Gave Up Driving",     "driving",             "Driving",                             "Base Item",
+  "QR16",    "Transformed - Difficulty Driving at Night",         "driving",             "Driving",                             "Base Item",
+  "QR16A",   "Transformed - Driving in Difficult Conditions",     "driving",             "Driving",                             "Base Item",
+  "QR17",    "Transformed - Accomplish Less Than You Would Like", "role limitations",    "Vision Specific: Role Difficulties",  "Base Item",
+  "QR18",    "Transformed - Limited in How Long You Can Work",    "role limitations",    "Vision Specific: Role Difficulties",  "Base Item",
+  "QR19",    "Transformed - Eye Pain Keep From Doing What Like",  "ocular pain",         "Ocular Pain",                         "Base Item",
+  "QR20",    "Transformed - I Stay Home Most of the Time",        "dependency",          "Vision Specific: Dependency",         "Base Item",
+  "QR21",    "Transformed - I Feel Frustrated a Lot of the Time", "well-being/distress", "Vision Specific: Mental Health",      "Base Item",
+  "QR22",    "Transformed - Much Less Control Over What I Do",    "well-being/distress", "Vision Specific: Mental Health",      "Base Item",
+  "QR23",    "Transformed - Rely Too Much on What Others Tell",   "dependency",          "Vision Specific: Dependency",         "Base Item",
+  "QR24",    "Transformed - I Need a Lot of Help From Others",    "dependency",          "Vision Specific: Dependency",         "Base Item",
+  "QR25",    "Transformed - Worry I'll Do Embarrassing Things",   "well-being/distress", "Vision Specific: Mental Health",      "Base Item",
+  "QRA01",   "Transformed - Rate Your Overall Health",            "general health",      "General Health",                      "Optional Item",
+  "QRA02",   "Transformed - Rate Your Eyesight Now",              "general vision",      "General Vision",                      "Optional Item",
+  "QRA03",   "Transformed - Difficulty Reading Small Print",      "near vision",         "Near Activities",                     "Optional Item",
+  "QRA04",   "Transformed - Difficulty Figure Out Bill Accuracy", "near vision",         "Near Activities",                     "Optional Item",
+  "QRA05",   "Transformed - Difficulty Shaving or Styling Hair",  "near vision",         "Near Activities",                     "Optional Item",
+  "QRA06",   "Transformed - Difficulty Recognizing People",       "distance vision",     "Distance Activities",                 "Optional Item",
+  "QRA07",   "Transformed - Difficulty Taking Part in Sports",    "distance vision",     "Distance Activities",                 "Optional Item",
+  "QRA08",   "Transformed - Difficulty Seeing Programs on TV",    "distance vision",     "Distance Activities",                 "Optional Item",
+  "QRA09",   "Transformed - Difficulty Entertaining Friends",     "social fx",           "Vision Specific: Social Functioning", "Optional Item",
+  "QR1A11A", "Transformed - Do You Have More Help From Others",   "role limitations",    "Vision Specific: Role Difficulties",  "Optional Item",
+  "QR1A11B", "Transformed - Limited in Kinds of Things Can Do",   "role limitations",    "Vision Specific: Role Difficulties",  "Optional Item",
+  "QR1A12",  "Transformed - Often Irritable Because Eyesight",    "well-being/distress", "Vision Specific: Mental Health",      "Optional Item",
+  "QR1A13",  "Transformed - I Don't Go Out of My Home Alone",     "dependency",          "Vision Specific: Dependency",         "Optional Item"
+) %>%
+  mutate(
+    PARCAT1 = "VFQ-25 INTERVIEWER ADMINISTERED",
+    PARCAT2 = "Transformed - Original Items"
+  ) %>%
+  select(PARAM, PARAMCD, PARCAT1, PARCAT2, PARCAT3, PARCAT4, PARCAT5)
+
+## Composite parameters ----
+param_lookup_composite <- tribble(
+  ~PARAMCD,   ~PARAM,                                                             ~PARCAT3,      ~PARCAT4,                              ~PARCAT5,
+  "QSBGH",    "General Health Score",                                             NA_character_, "General Health",                      "VFQ-25",
+  "QSBGV",    "General Vision Score",                                             NA_character_, "General Vision",                      "VFQ-25",
+  "QSBNA",    "Near Activities Score",                                            NA_character_, "Near Activities",                     "VFQ-25",
+  "QSBDA",    "Distance Activities Score",                                        NA_character_, "Distance Activities",                 "VFQ-25",
+  "QSBSF",    "Vision Specific: Social Functioning Score",                        NA_character_, "Vision Specific: Social Functioning", "VFQ-25",
+  "QSBCV",    "Color Vision Score",                                               NA_character_, "Color Vision",                        "VFQ-25",
+  "QSBPV",    "Peripheral Vision Score",                                          NA_character_, "Peripheral Vision",                   "VFQ-25",
+  "QSBDR",    "Driving Score",                                                    NA_character_, "Driving",                             "VFQ-25",
+  "QSBRD",    "Vision Specific: Role Difficulties Score",                         NA_character_, "Vision Specific: Role Difficulties",  "VFQ-25",
+  "QSBOP",    "Ocular Pain Score",                                                NA_character_, "Ocular Pain",                         "VFQ-25",
+  "QSBDP",    "Vision Specific: Dependency Score",                                NA_character_, "Vision Specific: Dependency",         "VFQ-25",
+  "QSBMH",    "Vision Specific: Mental Health Score",                             NA_character_, "Vision Specific: Mental Health",      "VFQ-25",
+  "QSOGH",    "General Health Score (incl. Optional Items)",                      NA_character_, "General Health",                      "VFQ-39",
+  "QSOGV",    "General Vision Score (incl. Optional Items)",                      NA_character_, "General Vision",                      "VFQ-39",
+  "QSONA",    "Near Activities Score (incl. Optional Items)",                     NA_character_, "Near Activities",                     "VFQ-39",
+  "QSODA",    "Distance Activities Score (incl. Optional Items)",                 NA_character_, "Distance Activities",                 "VFQ-39",
+  "QSOSF",    "Vision Specific: Social Functioning Score (incl. Optional Items)", NA_character_, "Vision Specific: Social Functioning", "VFQ-39",
+  "QSOCV",    "Color Vision Score (incl. Optional Items)",                        NA_character_, "Color Vision",                        "VFQ-39",
+  "QSOPV",    "Peripheral Vision Score (incl. Optional Items)",                   NA_character_, "Peripheral Vision",                   "VFQ-39",
+  "QSODR",    "Driving Score (incl. Optional Items)",                             NA_character_, "Driving",                             "VFQ-39",
+  "QSORD",    "Vision Specific: Role Difficulties Score (incl. Optional Items)",  NA_character_, "Vision Specific: Role Difficulties",  "VFQ-39",
+  "QSOOP",    "Ocular Pain Score (incl. Optional Items)",                         NA_character_, "Ocular Pain",                         "VFQ-39",
+  "QSODP",    "Vision Specific: Dependency Score (incl. Optional Items)",         NA_character_, "Vision Specific: Dependency",         "VFQ-39",
+  "QSOMH",    "Vision Specific: Mental Health Score (incl. Optional Items)",      NA_character_, "Vision Specific: Mental Health",      "VFQ-39",
+  "QBCSCORE", "Composite Score",                                                  NA_character_, "Composite Score",                     "VFQ-25",
+  "QOCSCORE", "Composite Score (incl. Optional Items)",                           NA_character_, "Composite Score",                     "VFQ-39"
+) %>%
+  mutate(
+    PARCAT1 = "VFQ-25 INTERVIEWER ADMINISTERED",
+    PARCAT2 = "Derived Scale"
+  ) %>%
+  select(PARAM, PARAMCD, PARCAT1, PARCAT2, PARCAT3, PARCAT4, PARCAT5)
+
+## ----eval=TRUE, echo=FALSE----------------------------------------------------
+dataset_vignette(
+  param_lookup_original,
+  display_vars = exprs(QSTESTCD, PARAM, PARAMCD, PARCAT1, PARCAT2, PARCAT3, PARCAT4, PARCAT5)
+)
+
+## ----eval=TRUE, echo=FALSE----------------------------------------------------
+dataset_vignette(
+  param_lookup_transformed,
+  display_vars = exprs(PARAM, PARAMCD, PARCAT1, PARCAT2, PARCAT3, PARCAT4, PARCAT5)
+)
+
+## ----eval=TRUE, echo=FALSE----------------------------------------------------
+dataset_vignette(
+  param_lookup_composite,
+  display_vars = exprs(PARAM, PARAMCD, PARCAT1, PARCAT2, PARCAT3, PARCAT4, PARCAT5)
+)
+
+## ----eval = TRUE--------------------------------------------------------------
+adsl_vars <- exprs(TRTSDT, TRTEDT, TRT01A, TRT01P)
+
+advfq <- qs %>%
+  derive_vars_merged(
+    dataset_add = adsl,
+    new_vars = adsl_vars,
+    by_vars = get_admiral_option("subject_keys")
+  )
+
+## ----eval = TRUE--------------------------------------------------------------
+advfq <- advfq %>%
+  derive_vars_dt(
+    new_vars_prefix = "A",
+    dtc = QSDTC
+  ) %>%
+  derive_vars_dy(
+    reference_date = TRTSDT,
+    source_vars = exprs(ADT)
+  )
+
+## ----eval = TRUE--------------------------------------------------------------
+advfq <- advfq %>%
+  ## Add PARAMCD for original parameters only - PARCATy and PARAM will be added later
+  derive_vars_merged_lookup(
+    dataset_add = param_lookup_original,
+    new_vars = exprs(PARAMCD),
+    by_vars = exprs(QSTESTCD)
+  ) %>%
+  mutate(
+    AVAL = QSSTRESN,
+    AVALC = QSORRES,
+    BASETYPE = "LAST PERIOD 01"
+  ) %>%
+  mutate(
+    AVISIT = case_when(
+      !is.na(VISIT) ~ str_to_title(VISIT),
+      TRUE ~ NA_character_
+    ),
+    AVISITN = case_when(
+      AVISIT == "Baseline" ~ 1,
+      AVISIT == "Week 12" ~ 12,
+      AVISIT == "Week 24" ~ 24,
+      TRUE ~ NA
+    ),
+  )
+
+## ----eval=TRUE, echo=FALSE----------------------------------------------------
+dataset_vignette(
+  advfq %>%
+    filter(USUBJID %in% c("01-701-1034"), PARAMCD %in% c("VFQ105", "VFQ106", "VFQ107", "VFQ108", "VFQ109", "VFQ114")) %>%
+    arrange(USUBJID, AVISITN, PARAMCD),
+  display_vars = exprs(USUBJID, QSTEST, AVISIT, PARAMCD, AVAL, AVALC)
+)
+
+## ----eval = FALSE-------------------------------------------------------------
+#  derive_extreme_records(
+#    dataset = advfq,
+#    dataset_add = advfq,
+#    filter_add = QSTESTCD == "VFQ1xx" & !is.na(AVAL),
+#    set_values_to = exprs(
+#      AVAL = transform_range(
+#        source = AVAL,
+#        source_range = c(1, 5), # or some other range, e.g. c(1, 6), depending on the parameter
+#        target_range = c(0, 100),
+#        flip_direction = TRUE # or FALSE, depending on the parameter
+#      ),
+#      PARAMCD = "QRxx"
+#    )
 #  )
 
-## ----eval=FALSE---------------------------------------------------------------
-#  adsl_vars <- exprs(TRTSDT, TRTEDT, TRT01A, TRT01P)
-#  
-#  advfq <- derive_vars_merged(
-#    qs,
-#    dataset_add = adsl,
-#    new_vars = adsl_vars,
-#    by_vars = get_admiral_option("subject_keys")
-#  )
+## ----eval = TRUE--------------------------------------------------------------
+range1to5_flip_params <- c(
+  "VFQ101", "VFQ103", "VFQ104", "VFQ105", "VFQ106", "VFQ107", "VFQ108",
+  "VFQ109", "VFQ110", "VFQ111", "VFQ112", "VFQ113", "VFQ114", "VFQ116",
+  "VFQ116A", "VFQ1A03", "VFQ1A04", "VFQ1A05", "VFQ1A06", "VFQ1A07",
+  "VFQ1A08", "VFQ1A09"
+)
 
-## ----eval=FALSE---------------------------------------------------------------
-#  advfq <- advfq %>%
-#    ## Add PARAMCD only - add PARAM etc later ----
-#    derive_vars_merged_lookup(
-#      dataset_add = param_lookup,
-#      new_vars = exprs(PARAMCD),
-#      by_vars = exprs(QSTESTCD)
-#    ) %>%
-#    ## Calculate AVAL and AVALC ----
-#    mutate(
-#      AVAL = QSSTRESN,
-#      AVALC = QSORRES
-#    )
+range1to6_flip_params <- c("VFQ102")
 
-## ----eval=FALSE---------------------------------------------------------------
-#  ## QR01 Recoded Item 01
-#  # set to 100 if [advfq.AVAL] = 1
-#  # else set to 75 if [advfq.AVAL] = 2
-#  # else set to 50 if [advfq.AVAL] = 3
-#  # else set to 25 if [advfq.AVAL] = 4
-#  # else set to 0 if [advfq.AVAL] = 5
-#  advfq <- advfq %>%
-#    derive_summary_records(
-#      dataset_add = advfq,
-#      by_vars = c(
-#        get_admiral_option("subject_keys"),
-#        exprs(!!!adsl_vars, PARAMCD, VISITNUM, VISIT)
-#      ),
-#      filter_add = QSTESTCD == "VFQ1" & !is.na(AVAL),
-#      set_values_to = exprs(
-#        AVAL = identity(AVAL),
-#        PARAMCD = "QR01"
-#      )
-#    ) %>%
-#    mutate(AVAL = ifelse(PARAMCD == "QR01",
-#      case_when(
-#        AVAL == 1 ~ 100,
-#        AVAL == 2 ~ 75,
-#        AVAL == 3 ~ 50,
-#        AVAL == 4 ~ 25,
-#        AVAL >= 5 ~ 0
-#      ),
-#      AVAL
-#    ))
+range1to5_noflip_params <- c(
+  "VFQ117", "VFQ118", "VFQ119", "VFQ120", "VFQ121", "VFQ122", "VFQ123",
+  "VFQ124", "VFQ125", "VFQ1A11A", "VFQ1A11B", "VFQ1A12", "VFQ1A13"
+)
 
-## ----eval=FALSE---------------------------------------------------------------
-#  ## Derive a new record as a summary record  ----
-#  ## QSG01 General Score 01
-#  # Average of QR01 and QR02 records
-#  advfq <- advfq %>%
-#    derive_summary_records(
-#      dataset_add = advfq,
-#      by_vars = c(
-#        get_admiral_option("subject_keys"),
-#        exprs(!!!adsl_vars, VISITNUM, VISIT, ADT, ADY)
-#      ),
-#      filter_add = PARAMCD %in% c("QR01", "QR02") & !is.na(AVAL),
-#      set_values_to = exprs(
-#        AVAL = mean(AVAL),
-#        PARAMCD = "QSG01"
-#      )
-#    )
+range0to10_noflip_params <- c("VFQ1A01", "VFQ1A02")
 
-## ----eval=FALSE---------------------------------------------------------------
-#  ## ANL01FL: Flag last result within an AVISIT for post-baseline records ----
-#  advfq <- advfq %>%
-#    restrict_derivation(
-#      derivation = derive_var_extreme_flag,
-#      args = params(
-#        new_var = ANL01FL,
-#        by_vars = c(get_admiral_option("subject_keys"), exprs(PARAMCD, AVISIT)),
-#        order = exprs(ADT, AVAL),
-#        mode = "last"
-#      ),
-#      filter = !is.na(AVISITN) & ONTRTFL == "Y"
-#    )
+## ----eval = TRUE--------------------------------------------------------------
+advfq <- advfq %>%
+  derive_var_merged_exist_flag(
+    dataset_add = advfq,
+    by_vars = exprs(!!!adsl_vars, ADT, ADY),
+    new_var = TEMP_VFQ115C_FL,
+    condition = QSTESTCD == "VFQ115C",
+    true_value = "Y",
+    false_value = "N",
+    missing_value = "M"
+  )
 
-## ----eval=FALSE---------------------------------------------------------------
-#  ## Get ASEQ and PARAM  ----
-#  advfq <- advfq %>%
-#    # Calculate ASEQ
-#    derive_var_obs_number(
-#      new_var = ASEQ,
-#      by_vars = get_admiral_option("subject_keys"),
-#      order = exprs(PARAMCD, ADT, AVISITN, VISITNUM),
-#      check_type = "error"
-#    ) %>%
-#    # Derive PARAM
-#    derive_vars_merged(dataset_add = select(param_lookup, -QSTESTCD), by_vars = exprs(PARAMCD))
+## ----eval = TRUE--------------------------------------------------------------
+advfq <- advfq %>%
+  call_derivation(
+    derivation = derive_extreme_records,
+    dataset = .,
+    dataset_add = .,
+    keep_source_vars = c(
+      get_admiral_option("subject_keys"),
+      exprs(PARAMCD, AVISIT, AVISITN, ADT, ADY),
+      adsl_vars
+    ),
+    variable_params = list(
+      params(
+        filter_add = QSTESTCD %in% range1to5_flip_params & !is.na(AVAL),
+        set_values_to = exprs(
+          AVAL = transform_range(
+            source = AVAL,
+            source_range = c(1, 5),
+            target_range = c(0, 100),
+            flip_direction = TRUE
+          ),
+          PARAMCD = str_replace(QSTESTCD, "VFQ1", "QR")
+        )
+      ),
+      params(
+        filter_add = QSTESTCD %in% range1to6_flip_params & !is.na(AVAL),
+        set_values_to = exprs(
+          AVAL = transform_range(
+            source = AVAL,
+            source_range = c(1, 6),
+            target_range = c(0, 100),
+            flip_direction = TRUE
+          ),
+          PARAMCD = str_replace(QSTESTCD, "VFQ1", "QR")
+        )
+      ),
+      params(
+        filter_add = QSTESTCD %in% range1to5_noflip_params & !is.na(AVAL),
+        set_values_to = exprs(
+          AVAL = transform_range(
+            source = AVAL,
+            source_range = c(1, 5),
+            target_range = c(0, 100),
+            flip_direction = FALSE
+          ),
+          PARAMCD = str_replace(QSTESTCD, "VFQ1", "QR")
+        )
+      ),
+      params(
+        filter_add = QSTESTCD %in% range0to10_noflip_params & !is.na(AVAL),
+        set_values_to = exprs(
+          AVAL = transform_range(
+            source = AVAL,
+            source_range = c(0, 10),
+            target_range = c(0, 100),
+            flip_direction = FALSE
+          ),
+          PARAMCD = str_replace(QSTESTCD, "VFQ1", "QR")
+        )
+      ),
+      # For QR15C, do it in two parts
+      # first in the case where QSTESTCD == "VFQ115C" is present at that visit
+      params(
+        filter_add = QSTESTCD == "VFQ115C" & !is.na(AVAL),
+        set_values_to = exprs(
+          AVAL = transform_range(
+            source = AVAL,
+            source_range = c(1, 5),
+            target_range = c(0, 100),
+            flip_direction = TRUE
+          ),
+          PARAMCD = "QR15C"
+        )
+      ),
+      # second in the case where QSTESTCD == "VFQ115C" is not present at that visit
+      params(
+        filter_add = TEMP_VFQ115C_FL == "N" & QSTESTCD == "VFQ115B" & AVAL == 1,
+        set_values_to = exprs(
+          AVAL = 0,
+          PARAMCD = "QR15C"
+        )
+      )
+    )
+  ) %>%
+  select(-TEMP_VFQ115C_FL)
 
-## ----eval=FALSE---------------------------------------------------------------
-#  # Add all ADSL variables
-#  advfq <- advfq %>%
-#    derive_vars_merged(
-#      dataset_add = select(adsl, !!!negate_vars(adsl_vars)),
-#      by_vars = get_admiral_option("subject_keys")
-#    )
+## ----eval = TRUE--------------------------------------------------------------
+advfq <- advfq %>%
+  derive_vars_merged_lookup(
+    dataset_add = rbind(
+      param_lookup_original %>% select(-QSTESTCD),
+      param_lookup_transformed
+    ),
+    by_vars = exprs(PARAMCD)
+  )
+
+## ----eval=TRUE, echo=FALSE----------------------------------------------------
+dataset_vignette(
+  advfq %>%
+    filter(
+      USUBJID %in% c("01-701-1034"),
+      PARAMCD %in% c("VFQ101", "VFQ102", "VFQ119", "QR01", "QR02", "QR19"),
+      AVISIT %in% c("Baseline", "Week 12")
+    ) %>%
+    arrange(USUBJID, AVISITN, PARAMCD) %>%
+    select(USUBJID, AVISIT, PARAM, PARAMCD, AVAL),
+  display_vars = exprs(USUBJID, AVISIT, PARAM, PARAMCD, AVAL)
+)
+
+## ----eval = TRUE--------------------------------------------------------------
+advfq_qsb <- derive_summary_records(
+  dataset_add = advfq,
+  filter_add = PARCAT2 == "Transformed - Original Items" & PARCAT5 == "Base Item" & !is.na(AVAL),
+  by_vars = c(
+    get_admiral_option("subject_keys"),
+    exprs(!!!adsl_vars, AVISIT, AVISITN, ADT, ADY, PARCAT4)
+  ),
+  set_values_to = exprs(AVAL = mean(AVAL))
+) %>%
+  derive_vars_merged_lookup(
+    dataset_add = filter(param_lookup_composite, str_starts(PARAMCD, "QSB")),
+    new_vars = exprs(PARAMCD, PARAM, PARCAT1, PARCAT2, PARCAT3, PARCAT5),
+    by_vars = exprs(PARCAT4)
+  )
+
+advfq_qso <- derive_summary_records(
+  dataset_add = advfq,
+  filter_add = PARCAT2 == "Transformed - Original Items" & !is.na(AVAL),
+  by_vars = c(
+    get_admiral_option("subject_keys"),
+    exprs(!!!adsl_vars, AVISIT, AVISITN, ADT, ADY, PARCAT4)
+  ),
+  set_values_to = exprs(AVAL = mean(AVAL))
+) %>%
+  derive_vars_merged_lookup(
+    dataset_add = filter(param_lookup_composite, str_starts(PARAMCD, "QSO")),
+    new_vars = exprs(PARAMCD, PARAM, PARCAT1, PARCAT2, PARCAT3, PARCAT5),
+    by_vars = exprs(PARCAT4)
+  )
+
+advfq <- bind_rows(advfq, advfq_qsb, advfq_qso)
+
+## ----eval=TRUE, echo=FALSE----------------------------------------------------
+dataset_vignette(
+  advfq %>%
+    filter(USUBJID %in% c("01-701-1034"), PARAMCD %in% c("QR05", "QR06", "QR07", "QR08", "QR09", "QR14", "QSBNA", "QSBDA")) %>%
+    arrange(USUBJID, AVISITN, PARAMCD) %>%
+    select(USUBJID, AVISIT, PARAM, PARAMCD, PARCAT4, AVAL),
+  display_vars = exprs(USUBJID, AVISIT, PARAM, PARAMCD, PARCAT4, AVAL)
+)
+
+## ----eval = TRUE--------------------------------------------------------------
+advfq <- advfq %>%
+  call_derivation(
+    derivation = derive_summary_records,
+    dataset_add = advfq,
+    by_vars = c(
+      get_admiral_option("subject_keys"),
+      exprs(!!!adsl_vars, AVISIT, AVISITN, ADT, ADY)
+    ),
+    variable_params = list(
+      params(
+        # Use Base Items only
+        filter_add = PARCAT5 == "VFQ-25" & str_sub(PARAMCD, 1, 3) == "QSB" &
+          PARCAT4 != "General Health" & !is.na(AVAL),
+        set_values_to = exprs(
+          AVAL = mean(AVAL),
+          PARAMCD = "QBCSCORE"
+        )
+      ),
+      params(
+        # Use optional items items only
+        filter_add = PARCAT5 == "VFQ-39" & str_sub(PARAMCD, 1, 3) == "QSO" &
+          PARCAT4 != "General Health" & !is.na(AVAL),
+        set_values_to = exprs(
+          AVAL = mean(AVAL),
+          PARAMCD = "QOCSCORE"
+        )
+      )
+    )
+  )
+
+## ----eval = TRUE--------------------------------------------------------------
+advfq <- advfq %>%
+  filter(str_detect(PARAMCD, "SCORE")) %>%
+  select(-PARAM, -starts_with("PARCAT")) %>%
+  derive_vars_merged_lookup(
+    dataset_add = param_lookup_composite,
+    new_vars = exprs(PARAM, PARCAT1, PARCAT2, PARCAT3, PARCAT4, PARCAT5),
+    by_vars = exprs(PARAMCD)
+  ) %>%
+  rbind(advfq %>% filter(!str_detect(PARAMCD, "SCORE")))
+
+## ----eval=TRUE, echo=FALSE----------------------------------------------------
+dataset_vignette(
+  advfq %>%
+    filter(
+      USUBJID %in% c("01-701-1034"),
+      (PARCAT5 == "VFQ-39" & str_sub(PARAMCD, 1, 3) == "QSO" & PARCAT4 != "General Health") | PARAMCD == "QOCSCORE",
+      AVISIT == "Baseline"
+    ) %>%
+    arrange(USUBJID, AVISITN, PARAMCD) %>%
+    select(USUBJID, AVISIT, PARAM, PARAMCD, PARCAT4, AVAL),
+  display_vars = exprs(USUBJID, AVISIT, PARAM, PARAMCD, PARCAT4, AVAL)
+)
 

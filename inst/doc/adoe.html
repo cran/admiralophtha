@@ -372,6 +372,11 @@ ADBCVA).</p>
 <h1>Programming Workflow</h1>
 <ul>
 <li><a href="#setup">Initial Set Up of ADOE</a></li>
+<li><a href="#param_avisit">Assigning
+<code>PARAM</code>/<code>PARAMCD</code> and
+<code>AVISIT/AVISITN</code></a></li>
+<li><a href="#parameters">Creating IOP pre to post-dose difference
+derived parameter</a></li>
 <li><a href="#further">Further Derivations of Standard BDS
 Variables</a></li>
 <li><a href="#example">Example Script</a></li>
@@ -480,7 +485,7 @@ findings vignette</a> for a more detailed discussion.</p>
 <span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>    <span class="co"># and leverage derive_var_extreme_flag()</span></span>
 <span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>  )</span></code></pre></div>
 </div>
-<div id="params" class="section level2">
+<div id="parameters" class="section level2">
 <h2>Creating IOP pre to post-dose difference derived parameter</h2>
 <p>Two derived parameters of interest are the difference between pre and
 post-dose IOP in each eye at each visit. These records can be added with
@@ -524,6 +529,12 @@ Order Functions vignette</a> for more details.</p>
 <span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>      )</span>
 <span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>    )</span>
 <span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>  )</span></code></pre></div>
+<pre><code>#&gt; Warning in attr(x, &quot;align&quot;): &#39;xfun::attr()&#39; is deprecated.
+#&gt; Use &#39;xfun::attr2()&#39; instead.
+#&gt; See help(&quot;Deprecated&quot;)
+#&gt; Warning in attr(x, &quot;format&quot;): &#39;xfun::attr()&#39; is deprecated.
+#&gt; Use &#39;xfun::attr2()&#39; instead.
+#&gt; See help(&quot;Deprecated&quot;)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -615,17 +626,17 @@ parameters. Then, <code>BASE</code> will be set to <code>NA</code> for
 <code>SIOPCHG</code> and <code>FIOPCHG</code>, so later calls to
 <code>derive_var_chg()</code> and <code>derive_var_pchg()</code> do not
 need any changes.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>adoe <span class="ot">&lt;-</span> adoe <span class="sc">%&gt;%</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="co"># Calculate BASE (do not derive for IOP change params)</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="fu">restrict_derivation</span>(</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    <span class="at">derivation =</span> derive_var_base,</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    <span class="at">args =</span> <span class="fu">params</span>(</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>      <span class="at">by_vars =</span> <span class="fu">c</span>(<span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>), <span class="fu">exprs</span>(PARAMCD, ATPT)),</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>      <span class="at">source_var =</span> AVAL,</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>      <span class="at">new_var =</span> BASE</span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>    ),</span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>    <span class="at">filter =</span> <span class="sc">!</span>PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;SIOPCHG&quot;</span>, <span class="st">&quot;FIOPCHG&quot;</span>)</span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  )</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>adoe <span class="ot">&lt;-</span> adoe <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="co"># Calculate BASE (do not derive for IOP change params)</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">restrict_derivation</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    <span class="at">derivation =</span> derive_var_base,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    <span class="at">args =</span> <span class="fu">params</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>      <span class="at">by_vars =</span> <span class="fu">c</span>(<span class="fu">get_admiral_option</span>(<span class="st">&quot;subject_keys&quot;</span>), <span class="fu">exprs</span>(PARAMCD, ATPT)),</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>      <span class="at">source_var =</span> AVAL,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>      <span class="at">new_var =</span> BASE</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>    ),</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>    <span class="at">filter =</span> <span class="sc">!</span>PARAMCD <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;SIOPCHG&quot;</span>, <span class="st">&quot;FIOPCHG&quot;</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  )</span></code></pre></div>
 </div>
 <div id="further" class="section level2">
 <h2>Further Derivations of Standard BDS Variables</h2>

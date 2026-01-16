@@ -1,28 +1,40 @@
 #' Add `CRITx`/`CRITxFL` pair to BCVA dataset
 #'
 #' @description
-#' `r lifecycle::badge("superseded")` The `derive_var_bcvacritxfl_util()`
-#' function has been superseded in favor of `admiral::derive_vars_crit_flag()`.
+#' `r lifecycle::badge("deprecated")` The `derive_var_bcvacritxfl_util()`
+#' function has been deprecated in favor of `admiral::derive_vars_crit_flag()` - please see
+#' the [criterion flag section of the
+#' ADBCVA vignette](https://pharmaverse.github.io/admiralophtha/articles/adbcva.html#critflags)
+#' for more details.
 #'
 #' Helper function for `derive_var_bcvacritxfl()` that adds a criterion variable `CRITx` and
 #' its corresponding flag `CRITxFL` to a dataset containing BCVA records
 #'
 #' @param dataset Input dataset (usually ADBCVA).
+#' @permitted [dataset]
 #' @param crit_var Variable with respect to which `CRITx`/`CRITxFL` are derived
 #' (usually `CHG` or `AVAL`).
+#' @permitted [var]
 #' @param critx_text String containing the text for `CRITx` variable.
+#' @permitted [char_scalar]
 #' @param critxfl_cond String containing R code detailing the criterion to be satisfied
 #' for `CRITxFL` variable to be equal to "Y".
+#' @permitted a character scalar, i.e., a character vector of length one, containing
+#'   evaluable R code, e.g. `"AVAL < 2"`
 #' @param counter Integer detailing the value of x to use in `CRITxFL`.
-#' @param bcva_range Numeric vector of length two detailing lower and upper change in
+#' @permitted [pos_int]
+#' @param bcva_range Numeric vector detailing lower and upper change in
 #' BCVA limits (`bcva_range` will be called in `critxfl_cond` if the criterion
 #' stipulates that change in BCVA lie inside some range).
+#' @permitted a numeric vector of length two, e.g. `c(1, 2)`
 #' @param bcva_uplim Numeric value detailing highest change in BCVA limit (`bcva_uplim`
 #' will be called in `critxfl_cond` if the criterion stipulates that change in BCVA
 #' lie below some upper limit).
+#' @permitted [num]
 #' @param bcva_lowlim Numeric value detailing lowest change in BCVA limit (`bcva_lowlim`
 #' will be called in `critxfl_cond` if the criterion stipulates that change in BCVA
 #' lie above some lower limit).
+#' @permitted [num]
 #'
 #' @details
 #' The criterion for change in BCVA in `CRITxFL` can be of three types: (1) value lies
@@ -37,8 +49,8 @@
 #'
 #' @return The input BCVA dataset with additional columns `CRITx`, `CRITxFL`.
 #'
-#' @family superseded
-#' @keywords internal superseded
+#' @family deprecated
+#' @keywords internal deprecated
 
 derive_var_bcvacritxfl_util <- function(dataset,
                                         crit_var,
@@ -48,6 +60,8 @@ derive_var_bcvacritxfl_util <- function(dataset,
                                         bcva_range = NULL,
                                         bcva_uplim = NULL,
                                         bcva_lowlim = NULL) {
+  # Note: no deprecate_inform() call here as this is an internal function only.
+
   # Input checks
   assert_vars(crit_var)
   assert_data_frame(dataset, required_vars = c(exprs(STUDYID, USUBJID), crit_var))
@@ -75,31 +89,42 @@ derive_var_bcvacritxfl_util <- function(dataset,
 #' Adds `CRITx`/`CRITxFL` pairs to BCVA dataset
 #'
 #' @description
-#' `r lifecycle::badge("superseded")` The `derive_var_bcvacritxfl()`
-#' function has been superseded in favor of `admiral::derive_vars_crit_flag()`.
+#' `r lifecycle::badge("deprecated")` The `derive_var_bcvacritxfl()`
+#' function has been deprecated in favor of `admiral::derive_vars_crit_flag()` - please see
+#' the [criterion flag section of the
+#' ADBCVA vignette](https://pharmaverse.github.io/admiralophtha/articles/adbcva.html#critflags)
+#' for more details.
 #'
 #' Adds a criterion variables `CRITx` and their corresponding flags `CRITxFL` to a
 #' dataset containing BCVA records
 #'
 #' @param dataset Input dataset containing BCVA data (usually ADBCVA).
+#' @permitted [dataset]
 #' @param crit_var Variable with respect to which `CRITx`/`CRITxFL` are derived
 #' (usually `CHG` or `AVAL`).
-#' @param additional_text string containing additional text to append to `CRITx`
+#' @permitted [var]
+#' @param additional_text string containing additional text to append to `CRITx`.
+#' @permitted [char_scalar]
 #' @param critxfl_index positive integer detailing the first value of x to use
 #' in `CRITxFL`. If not supplied, the function takes the first available value of
 #' x, counting up from x = 1.
-#' @param bcva_ranges List containing one or more numeric vectors of length 2. For each
+#' @permitted [pos_int]
+#' @param bcva_ranges List of numeric vectors. For each
 #' vector `c(a,b)` in `bcva_ranges`, a pair of variables `CRITx`, `CRITxFL` is created
 #' with the condition: `a <=  crit_var <= b`. If criterion flags of that type are not
-#' required, then leave as NULL.
+#' required, then leave as `NULL`.
+#' @permitted a list containing one or more numeric vectors, each of length two. E.g.
+#'   `list(c(1, 2), c(3, 4)`
 #' @param bcva_uplims List containing one or more numeric elements. For each
 #' element a in `bcva_uplims`, a pair of variables `CRITx`, `CRITxFL` is created
 #' with the condition: `crit_var <= a`. If criterion flags of that type are not
-#' required, then leave as NULL.
+#' required, then leave as `NULL`.
+#' @permitted a list containing one or more numeric scalars. E.g. `list(2, -4)`
 #' @param bcva_lowlims List containing one or more numeric elements. For each
 #' element b in `bcva_lowlims`, a pair of variables `CRITx`, `CRITxFL` is created
 #' with the condition: `crit_var >= b`. If criterion flags of that type are not required,
-#' then leave as NULL.
+#' then leave as `NULL`.
+#' @permitted a list containing one or more numeric scalars. E.g. `list(2, -4)`
 #'
 #' @details
 #' This function works by calling `derive_var_bcvacritxfl()` once for each of the
@@ -110,7 +135,8 @@ derive_var_bcvacritxfl_util <- function(dataset,
 #' @author Edoardo Mancini
 #'
 #' @return The input BCVA dataset with additional column pairs`CRITx`, `CRITxFL`.
-#' @keywords der_ophtha superseded
+#' @keywords der_ophtha deprecated
+#' @family deprecated
 #' @export
 #'
 #' @examples
@@ -169,6 +195,17 @@ derive_var_bcvacritxfl <- function(dataset,
                                    bcva_lowlims = NULL,
                                    additional_text = "",
                                    critxfl_index = NULL) {
+  deprecate_inform(
+    when = "1.4.0",
+    what = "admiralophtha::derive_var_bcvacritxfl()",
+    with = "admiral::derive_vars_crit_flag()",
+    details = c(
+      i = "See admiralophtha's guidance on creating BCVA criterion flags here:
+      https://pharmaverse.github.io/admiralophtha/articles/adbcva.html#critflags",
+      x = "This message will turn into a warning with release of admiralophtha 1.5.0."
+    )
+  )
+
   # Input checks
   assert_vars(crit_var)
   assert_data_frame(dataset, required_vars = crit_var)
@@ -181,7 +218,7 @@ derive_var_bcvacritxfl <- function(dataset,
   # Identify first value of x to be used for CRITx/CRITxFL
   if (is.null(critxfl_index)) {
     # Find largest index of CRITxFL already present in the dataset
-    critxfl_vars <- names(dataset)[grepl("^CRIT.*FL$", names(dataset))]
+    critxfl_vars <- names(dataset)[grepl("^CRIT.*FL$", names(dataset))] # nolint
 
     if (length(critxfl_vars) > 0) {
       max_critxfl_num <- critxfl_vars %>%
@@ -246,5 +283,5 @@ derive_var_bcvacritxfl <- function(dataset,
     counter <- counter + 1
   }
 
-  return(dataset)
+  dataset
 }
